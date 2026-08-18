@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ente Homepage Foundation</title>
+    <meta
+      name="description"
+      content="Live HTML and CSS foundation for the Ente marketing homepage."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./scroll-reveal.js" defer></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="logo" href="/" aria-label="Ente">
+          <img class="logo-mark" src="./assets/ente-logo.svg" alt="Ente" />
+        </a>
+        <nav class="main-nav" aria-label="Primary">
+          <a href="#products">Products</a>
+          <a href="#why">why ente</a>
+          <a href="#switch">Switch</a>
+          <a href="#community">Help</a>
+          <a href="#footer">Pricing</a>
+        </nav>
+        <a class="button button-dark" href="#products">Explore</a>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <h1>Private by design.</h1>
+            <p class="hero-subtitle">Not by <span>pinky</span><br />promise.</p>
+          </div>
+
+          <div class="hero-visual">
+            <img
+              class="hero-illustration"
+              src="./assets/ducky-web-first-fold.svg"
+              alt="Ente duck mascot next to privacy promise blocks"
+            />
+          </div>
+
+          <aside class="hero-side">
+            <p>
+              Private apps for photos, documents and 2FA.
+              <strong>We can’t see them.</strong>
+              That’s kind of the point.
+            </p>
+            <div class="stacked-actions">
+              <a class="button button-dark" href="#products">Explore ente</a>
+              <a class="button button-light" href="#why">why Ente?</a>
+            </div>
+          </aside>
+        </section>
+
+        <section class="logo-strip" aria-label="Recognition">
+          <img
+            class="brand-stripe"
+            src="./assets/brand-stripe.png"
+            alt="Recognition logos including HackerNews, Privacy Tools, r slash degoogle, Android Headlines, Android Police, and AlternativeTo"
+          />
+        </section>
+
+        <section class="products" id="products">
+          <article class="card card-photos">
+            <div class="card-content">
+              <div class="product-badge">
+                <span class="brand-mini">ente</span>
+                <span class="product-mini">Photos</span>
+              </div>
+              <h2>Safe home for your photos.</h2>
+              <div class="plan-pill">10GB free</div>
+              <div class="card-actions">
+                <a class="button button-dark" href="#footer">Download</a>
+                <a class="button button-light" href="#why">Learn more</a>
+              </div>
+            </div>
+
+            <div class="photo-device">
+              <img
+                class="product-art product-art-photos"
+                src="./assets/photo-banner.png"
+                alt="Ente Photos app preview on phone"
+              />
+            </div>
+          </article>
+
+          <div class="product-row">
+            <article class="card card-locker">
+              <div class="card-content">
+                <div class="product-badge">
+                  <span class="brand-mini">ente</span>
+                  <span class="product-mini">Locker</span>
+                </div>
+                <h3>Your documents. None of our reading material.</h3>
+                <div class="card-actions">
+                  <a class="button button-dark" href="#footer">Download</a>
+                  <a class="button button-light" href="#why">Learn more</a>
+                </div>
+              </div>
+              <div class="locker-device">
+                <img
+                  class="product-art product-art-locker"
+                  src="./assets/locker-banner.png"
+                  alt="Ente Locker app preview on phone"
+                />
+              </div>
+            </article>
+
+            <article class="card card-auth">
+              <div class="card-content">
+                <div class="product-badge">
+                  <span class="brand-mini">ente</span>
+                  <span class="product-mini">Auth</span>
+                </div>
+                <h3>Your logins are none of our business either.</h3>
+                <div class="card-actions">
+                  <a class="button button-dark" href="#footer">Download</a>
+                  <a class="button button-light" href="#why">Learn more</a>
+                </div>
+              </div>
+              <div class="auth-device">
+                <img
+                  class="product-art product-art-auth"
+                  src="./assets/auth-banner.png"
+                  alt="Ente Auth security preview"
+                />
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="why" id="why">
+          <p class="eyebrow">why ente?</p>
+          <h2>
+            <span>Most apps want to know you better. 😈</span>
+            <span>We don't. 🤫</span>
+          </h2>
+          <p class="lede">
+            Privacy at Ente isn't a lifestyle brand or a moody dark theme.
+            It's a product decision: your files are encrypted on your device,
+            and we never get the keys.
+          </p>
+
+          <div class="feature-grid">
+            <article>
+              <h3>Your data is encrypted before it leaves your device.</h3>
+              <p>
+                Which means we don't have the keys, the contents or a useful
+                excuse to be snooping around in your life.
+              </p>
+            </article>
+            <article>
+              <h3>We don't sell ads.</h3>
+              <p>
+                So your attention isn't the product, and your memories don't
+                have to audition for a recommendation engine.
+              </p>
+            </article>
+            <article>
+              <h3>We don't train AI on your memories.</h3>
+              <p>
+                Your holiday photos don't need a second career, and your private
+                documents deserve even less ambition from us.
+              </p>
+            </article>
+            <article>
+              <h3>Our code is open.</h3>
+              <p>
+                You don't have to take our word for it. You can inspect the
+                implementation, read the audits and keep us honest.
+              </p>
+            </article>
+          </div>
+
+          <div class="knowledge-row">
+            <div class="knowledge-copy">
+              <h3>What Ente knows about you</h3>
+              <p>
+                Less than your weather app, less than your shopping app, and
+                dramatically less than any company calling you part of an
+                ecosystem.
+              </p>
+            </div>
+
+            <img
+              class="data-card-art"
+              src="./assets/why-ente-creative.png"
+              alt="Ente data minimization bottom sheet"
+            />
+          </div>
+        </section>
+
+        <section class="testimonials">
+          <div class="noise"></div>
+          <h2>
+            <span>Finally, some user data</span>
+            <span>we can actually read. 😎</span>
+          </h2>
+          <div class="testimonial-grid">
+            <article class="quote-card">
+              <p>
+                Moved my entire photo library over. Expected a weekend project.
+                It was annoyingly easy.
+              </p>
+              <span>james my boy</span>
+            </article>
+            <article class="quote-card">
+              <p>
+                Moved my entire photo library over. Expected a weekend project.
+                It was annoyingly easy.
+              </p>
+              <span>james my boy</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="switch" id="switch">
+          <p class="eyebrow">Switch</p>
+          <h2>
+            <span>Breaking up with Big Tech is hard.</span>
+            <span>We packed your bags. 🎒</span>
+          </h2>
+          <p class="lede">
+            Background upload, duplicate handling, metadata preservation and
+            the satisfying feeling of moving thousands of photos somewhere less
+            nosy.
+          </p>
+          <div class="card-actions">
+            <a class="button button-dark" href="#footer">move your photos</a>
+            <a class="button button-light" href="#why">See migration guide</a>
+          </div>
+
+          <div class="import-panel">
+            <img
+              class="migration-art"
+              src="./assets/migration-creative.svg"
+              alt="Ente migration flow illustration"
+            />
+          </div>
+        </section>
+
+        <section class="community" id="community">
+          <img
+            class="community-art"
+            src="./assets/discord-ducky.svg"
+            alt="Ducky holding a Discord icon"
+          />
+          <div class="community-copy">
+            <h2>community.</h2>
+            <p>Turns out privacy people are pretty social.</p>
+            <strong>6k members</strong>
+            <a class="button button-indigo" href="#footer">Join Discord</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer" id="footer">
+        <div class="noise"></div>
+        <div class="footer-top">
+          <p>Privacy looks good on you. <span class="emoji-pop">😉</span></p>
+          <nav class="footer-nav" aria-label="Footer">
+            <a href="#products">Products</a>
+            <a href="#why">Features</a>
+            <a href="#footer">Technology</a>
+            <a href="#footer">Compare</a>
+            <a href="#footer">Articles</a>
+            <a href="#footer">Shops</a>
+            <a href="#footer">FAQ</a>
+            <a href="#footer">Contact</a>
+            <a href="#footer">Pricing</a>
+            <a href="#footer">Blog</a>
+          </nav>
+        </div>
+
+        <div class="footer-main">
+          <div class="footer-copy">
+            <h2>Build with love, so much love.</h2>
+            <p>with 20 of us.</p>
+          </div>
+          <img
+            class="footer-crowd-art"
+            src="./assets/bottom-sheet-crowd.svg"
+            alt="A crowd of Ente duck mascots"
+          />
+        </div>
+
+        <div class="footer-socials" aria-label="Social links">
+          <span>X</span>
+          <span>GitHub</span>
+          <span>Reddit</span>
+          <span>Discord</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
