@@ -341,6 +341,28 @@ a {
   border-radius: var(--radius-xl);
 }
 
+.product-card-logo {
+  position: absolute;
+  z-index: 7;
+  display: block;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.product-card-logo-photos {
+  top: 7.2%;
+  left: 5%;
+  width: clamp(92px, 9.1%, 107px);
+}
+
+.product-card-logo-locker,
+.product-card-logo-auth {
+  top: 5.9%;
+  left: 8.3%;
+  width: clamp(78px, 16.5%, 95px);
+}
+
 .card-photos {
   display: block;
   aspect-ratio: 1179 / 681;
