@@ -392,6 +392,29 @@ a {
   width: 66%;
 }
 
+.product-card-bg {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.product-card-bg-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform 1.9s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
 .card-photos {
   display: block;
   aspect-ratio: 1179 / 681;
@@ -399,10 +422,10 @@ a {
   padding: 0;
   overflow: visible;
   background-color: #08e800;
+}
+
+.card-photos .product-card-bg-art {
   background-image: url("/assets/photos-bg-card.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
 .card-photos::before,
@@ -606,46 +629,44 @@ a {
 .card-locker {
   aspect-ratio: 578 / 765;
   background-color: #1359e6;
+}
+
+.card-locker .product-card-bg-art {
   background-image: url("/assets/locker-bg.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
 .card-auth {
   aspect-ratio: 583 / 765;
   background-color: #9000ff;
-  background-image: url("/assets/auth-bg.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
-.card-photos,
-.card-locker,
-.card-auth {
-  transition: background-size 1.9s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: background-size;
+.card-auth .product-card-bg-art {
+  background-image: url("/assets/auth-bg.svg");
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .card-photos:hover,
-  .card-locker:hover,
-  .card-auth:hover {
-    background-size: 150% 150%;
+  .card-photos:hover .product-card-bg-art,
+  .card-locker:hover .product-card-bg-art,
+  .card-auth:hover .product-card-bg-art {
+    transform: scale(1.5);
   }
 }
 
-.card-photos:focus-within,
-.card-locker:focus-within,
-.card-auth:focus-within {
-  background-size: 150% 150%;
+.card-photos:focus-within .product-card-bg-art,
+.card-locker:focus-within .product-card-bg-art,
+.card-auth:focus-within .product-card-bg-art {
+  transform: scale(1.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-photos,
-  .card-locker,
-  .card-auth {
+  .product-card-bg-art,
+  .card-photos:hover .product-card-bg-art,
+  .card-locker:hover .product-card-bg-art,
+  .card-auth:hover .product-card-bg-art,
+  .card-photos:focus-within .product-card-bg-art,
+  .card-locker:focus-within .product-card-bg-art,
+  .card-auth:focus-within .product-card-bg-art {
+    transform: none;
     transition: none;
   }
 }
