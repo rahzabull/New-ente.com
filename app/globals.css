@@ -363,6 +363,21 @@ a {
   width: clamp(78px, 16.5%, 95px);
 }
 
+.product-card-copy {
+  position: absolute;
+  z-index: 4;
+  display: block;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.product-card-copy-photos {
+  top: 20.5%;
+  left: 11.7%;
+  width: 38.2%;
+}
+
 .card-photos {
   display: block;
   aspect-ratio: 1179 / 681;
