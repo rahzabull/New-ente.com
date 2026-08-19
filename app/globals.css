@@ -378,6 +378,20 @@ a {
   width: 38.2%;
 }
 
+.product-card-copy-locker,
+.product-card-copy-auth {
+  top: 19.6%;
+  left: 8.3%;
+}
+
+.product-card-copy-locker {
+  width: 37%;
+}
+
+.product-card-copy-auth {
+  width: 66%;
+}
+
 .card-photos {
   display: block;
   aspect-ratio: 1179 / 681;
