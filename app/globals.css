@@ -570,33 +570,6 @@ a {
   background-size: 100% 100%;
 }
 
-.card-photos,
-.card-locker,
-.card-auth {
-  transition: background-size 1.9s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: background-size;
-}
-
-@media (hover: hover) {
-  .card-photos:hover,
-  .card-photos:focus-within,
-  .card-locker:hover,
-  .card-locker:focus-within,
-  .card-auth:hover,
-  .card-auth:focus-within {
-    background-size: 150% 150%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-photos,
-  .card-locker,
-  .card-auth {
-    background-size: 100% 100%;
-    transition: none;
-  }
-}
-
 .card-locker::before {
   display: none;
 }
