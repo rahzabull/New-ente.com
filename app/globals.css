@@ -1,4 +1,5 @@
 :root {
+  --viewport-inline-size: 100vw;
   --bg: #ffffff;
   --text: #050505;
   --muted: #8d8d8d;
@@ -99,7 +100,7 @@ main::before {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 100vw;
+  width: var(--viewport-inline-size);
   background: var(--bg);
   transform: translateX(-50%);
   pointer-events: none;
@@ -1024,10 +1025,10 @@ main::before {
 }
 
 .testimonials {
-  width: 100vw;
+  width: var(--viewport-inline-size);
   margin-top: clamp(90px, 10vw, 150px);
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  margin-left: calc((100% - var(--viewport-inline-size)) / 2);
+  margin-right: calc((100% - var(--viewport-inline-size)) / 2);
   padding: 92px 70px 86px;
   background: #2c2c2c;
   isolation: isolate;
@@ -1285,6 +1286,7 @@ main::before {
     transform: none;
     animation: none;
   }
+
 }
 
 .import-window {
@@ -1356,14 +1358,14 @@ main::before {
     calc((100vw - 1440px) / 2 + 112px)
   );
   --footer-content-lift: clamp(56px, 6vw, 88px);
-  width: 100vw;
+  width: var(--viewport-inline-size);
   min-height: max(100svh, 820px);
   position: sticky;
   z-index: 0;
   bottom: 0;
   margin-top: clamp(90px, 10vw, 150px);
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  margin-left: calc((100% - var(--viewport-inline-size)) / 2);
+  margin-right: calc((100% - var(--viewport-inline-size)) / 2);
   padding: clamp(132px, 11vw, 160px) var(--footer-content-gutter) 0;
   border-radius: 0;
   background: #2c2c2c;
@@ -1396,7 +1398,7 @@ main::before {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 48px;
-  transform: translateY(calc(50% - var(--footer-content-lift)));
+  transform: translateY(clamp(130px, 12vw, 180px));
 }
 
 .footer-top p {
@@ -1515,14 +1517,17 @@ main::before {
 
   .footer-top {
     grid-template-columns: 1fr;
+    transform: translateY(48px);
   }
 
   .footer > .footer-community {
-    margin-top: 58px;
+    margin-top: 72px;
+    transform: none;
   }
 
   .footer > .footer-crowd-art {
     width: min(88%, 1026px);
+    transform: translate(10%, 0);
   }
 }
 
@@ -1539,6 +1544,30 @@ main::before {
   .import-body,
   .footer-socials {
     flex-wrap: wrap;
+  }
+
+  .site-shell > .topbar {
+    top: 10px;
+    min-width: 0;
+    min-height: 58px;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .topbar .main-nav {
+    display: none;
+  }
+
+  .topbar > .button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .topbar .logo-mark {
+    height: 20px;
   }
 
   .topbar,
@@ -1574,6 +1603,15 @@ main::before {
     margin-left: -22px;
     padding-right: 10px;
     padding-left: 10px;
+  }
+
+  .reveal-on-scroll.reveal-slide-left,
+  .reveal-on-scroll.reveal-slide-right {
+    transform: translate3d(0, 26px, 0) scale(0.985);
+  }
+
+  .reveal-on-scroll.is-visible {
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .quote-card {
@@ -1617,6 +1655,7 @@ main::before {
 
   .footer-top {
     gap: 32px;
+    transform: none;
   }
 
   .footer-top p {
@@ -1629,7 +1668,8 @@ main::before {
   }
 
   .footer > .footer-community {
-    margin-top: 48px;
+    margin-top: 56px;
+    transform: none;
   }
 
   .footer-community h2 {
@@ -1653,6 +1693,7 @@ main::before {
   .footer > .footer-crowd-art {
     left: 12px;
     width: calc(100% - 24px);
+    transform: none;
   }
 
   .why h2 span:first-child,

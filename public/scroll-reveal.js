@@ -1,3 +1,13 @@
+const syncViewportInlineSize = () => {
+  document.documentElement.style.setProperty(
+    "--viewport-inline-size",
+    `${document.documentElement.clientWidth}px`
+  );
+};
+
+syncViewportInlineSize();
+window.addEventListener("resize", syncViewportInlineSize, { passive: true });
+
 const revealGroups = [
   { selector: ".hero-copy", step: 0, variant: "reveal-slide-left" },
   { selector: ".hero-visual", step: 120, variant: "reveal-zoom" },
