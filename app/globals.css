@@ -139,7 +139,6 @@ a {
 .why h3,
 .testimonials h2,
 .switch h2,
-.community h2,
 .footer h2 {
   letter-spacing: -0.06em;
   line-height: 0.9;
@@ -806,8 +805,7 @@ a {
 }
 
 .why,
-.switch,
-.community {
+.switch {
   position: relative;
   padding: 132px 92px 38px;
 }
@@ -816,8 +814,7 @@ a {
   margin-top: clamp(70px, 8vw, 120px);
 }
 
-.switch,
-.community {
+.switch {
   margin-top: clamp(80px, 9vw, 130px);
 }
 
@@ -919,7 +916,6 @@ a {
 .feature-grid p,
 .knowledge-copy p,
 .switch .lede,
-.community p,
 .hero-side p {
   margin: 0;
   font-size: 1.25rem;
@@ -1331,55 +1327,31 @@ a {
   font-weight: 500;
 }
 
-.community {
-  display: grid;
-  grid-template-columns: max-content max-content;
-  justify-content: center;
-  align-items: center;
-  gap: 24px;
-  padding-top: 92px;
-  padding-bottom: 82px;
-}
-
-.community-art {
-  display: block;
-  width: min(100%, 280px);
-  height: auto;
-  justify-self: center;
-}
-
-.community h2 {
-  margin: 0 0 10px;
-  font-size: clamp(3.9rem, 5vw, 4.85rem);
-  line-height: 0.94;
-}
-
-.community-copy {
-  max-width: 340px;
-  justify-self: center;
-}
-
-.community strong {
-  display: block;
-  margin-top: 12px;
-  color: #bdbdbd;
-  font-size: 1.25rem;
-  font-weight: 500;
-}
-
-.community .button {
-  margin-top: 24px;
-  width: fit-content;
-}
-
 .footer {
-  min-height: 980px;
-  aspect-ratio: 1440 / 1254;
+  width: 100vw;
+  min-height: max(100svh, 820px);
+  margin-top: clamp(90px, 10vw, 150px);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   padding: clamp(100px, 9.5vw, 136px) clamp(72px, 8.5vw, 122px) 0;
   border-radius: 68px 68px 0 0;
-  background: #2c2c2c url("/assets/footer-bg.png") center center / cover no-repeat;
-  background-position: center calc(50% + var(--parallax-bg-y, 0px));
+  background: #2c2c2c;
   isolation: isolate;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: url("/assets/footer-bg.png") center center / cover no-repeat;
+  background-position: center calc(50% + var(--parallax-bg-y, 0px));
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.footer > * {
+  z-index: 1;
 }
 
 .footer .noise {
@@ -1462,7 +1434,6 @@ a {
   .hero,
   .card-photos,
   .knowledge-row,
-  .community,
   .footer-top,
   .footer-main {
     grid-template-columns: 1fr;
@@ -1493,7 +1464,7 @@ a {
 
   .footer {
     aspect-ratio: auto;
-    min-height: 1040px;
+    min-height: max(100svh, 1040px);
   }
 
   .footer-top {
@@ -1530,7 +1501,6 @@ a {
   .why,
   .testimonials,
   .switch,
-  .community,
   .footer {
     padding-left: 22px;
     padding-right: 22px;
@@ -1538,8 +1508,7 @@ a {
 
   .hero,
   .why,
-  .switch,
-  .community {
+  .switch {
     padding-top: 54px;
   }
 
@@ -1577,7 +1546,6 @@ a {
   .locker-slot,
   .shield-slot,
   .sleepy-slot,
-  .community-slot,
   .footer > .footer-crowd-art {
     width: 100%;
   }
@@ -1588,7 +1556,7 @@ a {
   }
 
   .footer {
-    min-height: 820px;
+    min-height: max(100svh, 820px);
     padding-top: 64px;
     border-radius: 38px 38px 0 0;
   }

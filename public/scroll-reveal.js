@@ -12,8 +12,6 @@ const revealGroups = [
   { selector: ".testimonial-grid", step: 0, variant: "reveal-zoom" },
   { selector: ".switch > .eyebrow, .switch > h2, .switch > .lede, .switch > .card-actions", step: 90, variant: "reveal-slide-left" },
   { selector: ".switch > .import-panel", step: 220, variant: "reveal-zoom" },
-  { selector: ".community > .community-art", step: 0, variant: "reveal-slide-left" },
-  { selector: ".community > .community-copy", step: 140, variant: "reveal-slide-right" },
   { selector: ".footer > .footer-top", step: 0, variant: "reveal-slide-left" },
   { selector: ".footer > .footer-main", step: 120, variant: "reveal-zoom" },
   { selector: ".footer > .footer-socials", step: 220, variant: "reveal-slide-right" }
@@ -121,8 +119,6 @@ const parallaxGroups = [
   { selector: ".testimonials > h2", speed: -0.035, max: 24 },
   { selector: ".testimonial-grid", speed: 0.03, max: 22 },
   { selector: ".import-panel", speed: 0.04, max: 26 },
-  { selector: ".community-art", speed: 0.065, max: 30 },
-  { selector: ".community-copy", speed: -0.03, max: 20 },
   { selector: ".footer-top", speed: -0.025, max: 20 },
   { selector: ".footer-main", speed: -0.045, max: 32 },
   { selector: ".footer-crowd-art", speed: 0.055, max: 38 }
