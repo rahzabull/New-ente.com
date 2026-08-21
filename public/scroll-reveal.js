@@ -111,9 +111,95 @@ const initTestimonialBackground = () => {
   backgroundObserver.observe(testimonials);
 };
 
+const parallaxGroups = [
+  { selector: ".hero-copy", speed: -0.045, max: 30 },
+  { selector: ".hero-illustration", speed: 0.075, max: 48 },
+  { selector: ".hero-side", speed: -0.03, max: 22 },
+  { selector: ".product-card-logo", speed: -0.02, max: 14 },
+  { selector: ".product-card-copy", speed: -0.035, max: 20 },
+  { selector: ".data-card-art", speed: 0.055, max: 30 },
+  { selector: ".testimonials > h2", speed: -0.035, max: 24 },
+  { selector: ".testimonial-grid", speed: 0.03, max: 22 },
+  { selector: ".import-panel", speed: 0.04, max: 26 },
+  { selector: ".community-art", speed: 0.065, max: 30 },
+  { selector: ".community-copy", speed: -0.03, max: 20 },
+  { selector: ".footer-top", speed: -0.025, max: 20 },
+  { selector: ".footer-main", speed: -0.045, max: 32 },
+  { selector: ".footer-crowd-art", speed: 0.055, max: 38 }
+];
+
+const parallaxBackgrounds = [
+  { selector: ".testimonials", speed: 0.025, max: 24 },
+  { selector: ".footer", speed: 0.02, max: 30 }
+];
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const initParallax = () => {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const layers = parallaxGroups.flatMap(({ selector, speed, max }) =>
+    Array.from(document.querySelectorAll(selector), (node) => ({
+      node,
+      speed,
+      max,
+      current: 0
+    }))
+  );
+  const backgrounds = parallaxBackgrounds.flatMap(({ selector, speed, max }) =>
+    Array.from(document.querySelectorAll(selector), (node) => ({ node, speed, max }))
+  );
+
+  if (!layers.length && !backgrounds.length) {
+    return;
+  }
+
+  layers.forEach(({ node }) => node.classList.add("parallax-layer"));
+
+  let frame = 0;
+
+  const getOffset = (node, speed, max, viewportHeight, strength, current = 0) => {
+    const bounds = node.getBoundingClientRect();
+    const centerDelta = viewportHeight / 2 - (bounds.top + bounds.height / 2 - current);
+    return clamp(centerDelta * speed * strength, -max * strength, max * strength);
+  };
+
+  const update = () => {
+    frame = 0;
+
+    const viewportHeight = window.innerHeight;
+    const strength = window.innerWidth <= 820 ? 0.55 : 1;
+
+    layers.forEach((layer) => {
+      const { node, speed, max, current } = layer;
+      const offset = getOffset(node, speed, max, viewportHeight, strength, current);
+      layer.current = offset;
+      node.style.setProperty("--parallax-y", `${offset.toFixed(2)}px`);
+    });
+
+    backgrounds.forEach(({ node, speed, max }) => {
+      const offset = getOffset(node, speed, max, viewportHeight, strength);
+      node.style.setProperty("--parallax-bg-y", `${offset.toFixed(2)}px`);
+    });
+  };
+
+  const requestUpdate = () => {
+    if (!frame) {
+      frame = window.requestAnimationFrame(update);
+    }
+  };
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate, { passive: true });
+};
+
 const initAnimations = () => {
   initScrollReveal();
   initTestimonialBackground();
+  initParallax();
 };
 
 if (document.readyState === "loading") {

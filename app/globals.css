@@ -58,6 +58,11 @@ body {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
+.parallax-layer {
+  translate: 0 var(--parallax-y, 0px);
+  will-change: translate;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -67,6 +72,11 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .parallax-layer {
+    translate: none;
+    will-change: auto;
   }
 }
 
@@ -1010,6 +1020,7 @@ a {
   z-index: 0;
   inset: 0;
   background: url("/assets/testimonial-bg.png") center center / cover no-repeat;
+  background-position: center calc(50% + var(--parallax-bg-y, 0px));
   transform: scale(1);
   transform-origin: center;
   transition: transform 1.9s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1367,6 +1378,7 @@ a {
   padding: clamp(100px, 9.5vw, 136px) clamp(72px, 8.5vw, 122px) 0;
   border-radius: 68px 68px 0 0;
   background: #2c2c2c url("/assets/footer-bg.png") center center / cover no-repeat;
+  background-position: center calc(50% + var(--parallax-bg-y, 0px));
   isolation: isolate;
 }
 
