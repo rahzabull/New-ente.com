@@ -13,7 +13,7 @@ const revealGroups = [
   { selector: ".switch > .eyebrow, .switch > h2, .switch > .lede, .switch > .card-actions", step: 90, variant: "reveal-slide-left" },
   { selector: ".switch > .import-panel", step: 220, variant: "reveal-zoom" },
   { selector: ".footer > .footer-top", step: 0, variant: "reveal-slide-left" },
-  { selector: ".footer > .footer-main", step: 120, variant: "reveal-zoom" },
+  { selector: ".footer > .footer-community", step: 120, variant: "reveal-slide-left" },
   { selector: ".footer > .footer-socials", step: 220, variant: "reveal-slide-right" }
 ];
 
@@ -109,6 +109,60 @@ const initTestimonialBackground = () => {
   backgroundObserver.observe(testimonials);
 };
 
+const initSwitchGapStretch = () => {
+  const switchSection = document.querySelector(".switch");
+  const migrationPanel = switchSection?.querySelector(".import-panel");
+
+  if (
+    !switchSection ||
+    !migrationPanel ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return;
+  }
+
+  let frame = 0;
+  let lastScrollY = window.scrollY;
+  let maxProgress = 0;
+
+  const update = () => {
+    frame = 0;
+
+    const currentScrollY = window.scrollY;
+    const scrollingDown = currentScrollY >= lastScrollY;
+    lastScrollY = currentScrollY;
+
+    if (!scrollingDown) {
+      return;
+    }
+
+    const viewportHeight = window.innerHeight;
+    const panelBottom = migrationPanel.getBoundingClientRect().bottom;
+    const progress = clamp(
+      (viewportHeight * 0.9 - panelBottom) / (viewportHeight * 0.4),
+      0,
+      1
+    );
+
+    maxProgress = Math.max(maxProgress, progress);
+    const maxStretch = window.innerWidth <= 820 ? 36 : 72;
+    switchSection.style.setProperty(
+      "--switch-gap-stretch",
+      `${(maxProgress * maxStretch).toFixed(2)}px`
+    );
+  };
+
+  const requestUpdate = () => {
+    if (!frame) {
+      frame = window.requestAnimationFrame(update);
+    }
+  };
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate, { passive: true });
+};
+
 const parallaxGroups = [
   { selector: ".hero-copy", speed: -0.045, max: 30 },
   { selector: ".hero-illustration", speed: 0.075, max: 48 },
@@ -120,7 +174,7 @@ const parallaxGroups = [
   { selector: ".testimonial-grid", speed: 0.03, max: 22 },
   { selector: ".import-panel", speed: 0.04, max: 26 },
   { selector: ".footer-top", speed: -0.025, max: 20 },
-  { selector: ".footer-main", speed: -0.045, max: 32 },
+  { selector: ".footer-community", speed: -0.045, max: 32 },
   { selector: ".footer-crowd-art", speed: 0.055, max: 38 }
 ];
 
@@ -195,6 +249,7 @@ const initParallax = () => {
 const initAnimations = () => {
   initScrollReveal();
   initTestimonialBackground();
+  initSwitchGapStretch();
   initParallax();
 };
 
