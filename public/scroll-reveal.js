@@ -421,6 +421,12 @@ const initPrivacyStory = () => {
     return clamp(-bounds.top / distance, 0, 1);
   };
 
+  const getIntroProgress = () => {
+    const bounds = section.getBoundingClientRect();
+    const viewportHeight = Math.max(window.innerHeight, 1);
+    return clamp((viewportHeight * 0.8 - bounds.top) / (viewportHeight * 0.58), 0, 1);
+  };
+
   const resolveCollisions = (targets, activeIndex, width, height) => {
     const movable = targets.filter((_, index) => index !== activeIndex);
 
@@ -566,17 +572,20 @@ const initPrivacyStory = () => {
     frame = 0;
     const delta = lastTime ? clamp((time - lastTime) / 16.667, 0.5, 2.2) : 1;
     lastTime = time;
-    storyProgress = getScrollProgress();
+    // The section releases shortly after the final bubble settles, while this
+    // scale preserves the established physical timing of the internal stages.
+    storyProgress = clamp(getScrollProgress() / 1.16, 0, 1);
+    const introProgress = getIntroProgress();
     const isMobile = window.innerWidth <= 820;
     const width = sticky.clientWidth;
     const height = sticky.clientHeight;
-    const introReveal = smoothstep(0, 0.13, storyProgress);
+    const introReveal = smoothstep(0, 1, introProgress);
     const headlineMove = smoothstep(0.17, 0.43, storyProgress);
     const responseReveal = smoothstep(0.29, 0.48, storyProgress);
     const endStateDropPercent = isMobile ? 5.5 : 8;
     const endStateDropPixels = height * (endStateDropPercent / 100);
     const initialHeadlineLeft = isMobile ? 6 : 15;
-    const initialHeadlineTop = isMobile ? 30 : 36;
+    const initialHeadlineTop = 22;
     const finalHeadlineLeft = isMobile ? 6 : 7.5;
     const finalHeadlineTop = 12.5 + endStateDropPercent;
     const finalHeadlineScale = isMobile ? 0.5 : 0.56;
@@ -596,13 +605,13 @@ const initPrivacyStory = () => {
     headlineLines.forEach((line, index) => {
       const lineReveal =
         index === 0
-          ? smoothstep(0.045, 0.115, storyProgress)
-          : smoothstep(0.095, 0.17, storyProgress);
+          ? smoothstep(0, 0.72, introProgress)
+          : smoothstep(0.2, 1, introProgress);
       line.style.opacity = lineReveal > 0.01 ? "1" : "0";
       line.style.clipPath = `inset(0 ${((1 - lineReveal) * 100).toFixed(2)}% 0 0)`;
     });
     if (eyebrow) {
-      const initialEyebrowTop = isMobile ? 22 : 28;
+      const initialEyebrowTop = 14;
       const finalEyebrowTop = 7.5 + endStateDropPercent;
       const eyebrowLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
       const eyebrowTop = initialEyebrowTop + (finalEyebrowTop - initialEyebrowTop) * headlineMove;
@@ -775,6 +784,134 @@ const initParallax = () => {
   window.addEventListener("resize", requestUpdate, { passive: true });
 };
 
+const initFooterElastic = () => {
+  const art = document.querySelector(".footer-crowd-art");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const hoverCapable = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+  if (!art || reduceMotion.matches || !hoverCapable.matches) {
+    return;
+  }
+
+  const state = {
+    scaleX: 1,
+    scaleY: 1,
+    shiftY: 0,
+    rotation: 0,
+    scaleXVelocity: 0,
+    scaleYVelocity: 0,
+    shiftYVelocity: 0,
+    rotationVelocity: 0
+  };
+  let hovered = false;
+  let pointerX = 0;
+  let pointerVelocityX = 0;
+  let pointerVelocityY = 0;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+  let lastPointerTime = 0;
+  let lastFrameTime = 0;
+  let frame = 0;
+
+  const spring = (valueKey, velocityKey, target, delta) => {
+    state[velocityKey] += (target - state[valueKey]) * 0.105 * delta;
+    state[velocityKey] *= Math.pow(0.79, delta);
+    state[valueKey] += state[velocityKey] * delta;
+  };
+
+  const render = (time) => {
+    const delta = lastFrameTime ? clamp((time - lastFrameTime) / 16.667, 0.5, 2) : 1;
+    lastFrameTime = time;
+    pointerVelocityX *= Math.pow(0.8, delta);
+    pointerVelocityY *= Math.pow(0.8, delta);
+
+    const verticalMotion = clamp(pointerVelocityY / 1.35, -1, 1);
+    const horizontalMotion = clamp(pointerVelocityX / 1.35, -1, 1);
+    const downwardAmount = Math.max(verticalMotion, 0);
+    const upwardAmount = Math.min(verticalMotion, 0);
+    const targetScaleY = hovered
+      ? 1.055 + downwardAmount * 0.065 + upwardAmount * 0.04
+      : 1;
+    const targetScaleX = hovered
+      ? 0.97 - downwardAmount * 0.03 - upwardAmount * 0.02
+      : 1;
+    const targetShiftY = hovered ? -4 + verticalMotion * 7 : 0;
+    const targetRotation = hovered ? pointerX * 0.72 + horizontalMotion * 0.42 : 0;
+
+    spring("scaleY", "scaleYVelocity", targetScaleY, delta);
+    spring("scaleX", "scaleXVelocity", targetScaleX, delta);
+    spring("shiftY", "shiftYVelocity", targetShiftY, delta);
+    spring("rotation", "rotationVelocity", targetRotation, delta);
+
+    art.style.setProperty("--footer-elastic-scale-x", state.scaleX.toFixed(4));
+    art.style.setProperty("--footer-elastic-scale-y", state.scaleY.toFixed(4));
+    art.style.setProperty("--footer-elastic-shift", `${state.shiftY.toFixed(2)}px`);
+    art.style.setProperty("--footer-elastic-rotation", `${state.rotation.toFixed(3)}deg`);
+
+    const isSettled =
+      Math.abs(pointerVelocityX) < 0.002 &&
+      Math.abs(pointerVelocityY) < 0.002 &&
+      Math.abs(state.scaleX - targetScaleX) < 0.0004 &&
+      Math.abs(state.scaleY - targetScaleY) < 0.0004 &&
+      Math.abs(state.shiftY - targetShiftY) < 0.04 &&
+      Math.abs(state.rotation - targetRotation) < 0.004;
+
+    if (isSettled) {
+      frame = 0;
+      lastFrameTime = 0;
+      art.style.setProperty("--footer-elastic-scale-x", targetScaleX.toFixed(4));
+      art.style.setProperty("--footer-elastic-scale-y", targetScaleY.toFixed(4));
+      art.style.setProperty("--footer-elastic-shift", `${targetShiftY.toFixed(2)}px`);
+      art.style.setProperty("--footer-elastic-rotation", `${targetRotation.toFixed(3)}deg`);
+      return;
+    }
+
+    frame = window.requestAnimationFrame(render);
+  };
+
+  const requestTick = () => {
+    if (!frame) {
+      frame = window.requestAnimationFrame(render);
+    }
+  };
+
+  const updatePointerPosition = (event) => {
+    const bounds = art.getBoundingClientRect();
+    pointerX = clamp(((event.clientX - bounds.left) / Math.max(bounds.width, 1)) * 2 - 1, -1, 1);
+  };
+
+  art.addEventListener("pointerenter", (event) => {
+    hovered = true;
+    updatePointerPosition(event);
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+    lastPointerTime = performance.now();
+    state.scaleYVelocity += 0.018;
+    state.scaleXVelocity -= 0.009;
+    requestTick();
+  });
+
+  art.addEventListener("pointermove", (event) => {
+    const now = performance.now();
+    const elapsed = Math.max(now - lastPointerTime, 8);
+    pointerVelocityX = clamp((event.clientX - lastPointerX) / elapsed, -2.4, 2.4);
+    pointerVelocityY = clamp((event.clientY - lastPointerY) / elapsed, -2.4, 2.4);
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+    lastPointerTime = now;
+    updatePointerPosition(event);
+    requestTick();
+  });
+
+  art.addEventListener("pointerleave", () => {
+    hovered = false;
+    pointerX = 0;
+    state.scaleYVelocity -= 0.012;
+    state.scaleXVelocity += 0.006;
+    requestTick();
+  });
+};
+
 const initAnimations = () => {
   initScrollReveal();
   initTestimonialBackground();
@@ -783,6 +920,7 @@ const initAnimations = () => {
   initSwitchGapStretch();
   initPrivacyStory();
   initParallax();
+  initFooterElastic();
 };
 
 if (document.readyState === "loading") {
