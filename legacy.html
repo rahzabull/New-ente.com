@@ -184,64 +184,124 @@
           </div>
         </section>
 
-        <section class="why" id="why">
-          <p class="eyebrow">why ente?</p>
-          <h2>
-            <span>Most apps want to know you better. 😈</span>
-            <span>We don't. 🥱</span>
-          </h2>
-          <p class="lede">
-            Privacy at Ente isn't a lifestyle brand or a moody dark theme.
-            It's a product decision: your files are encrypted on your device,
-            and we never get the keys.
-          </p>
-
-          <div class="feature-grid">
-            <article>
-              <h3>Your data is encrypted before it leaves your device.</h3>
-              <p>
-                Which means we don't have the keys, the contents or a useful
-                excuse to be snooping around in your life.
-              </p>
-            </article>
-            <article>
-              <h3>We don't sell ads.</h3>
-              <p>
-                So your attention isn't the product, and your memories don't
-                have to audition for a recommendation engine.
-              </p>
-            </article>
-            <article>
-              <h3>We don't train AI on your memories.</h3>
-              <p>
-                Your holiday photos don't need a second career, and your private
-                documents deserve even less ambition from us.
-              </p>
-            </article>
-            <article>
-              <h3>Our code is open.</h3>
-              <p>
-                You don't have to take our word for it. You can inspect the
-                implementation, read the audits and keep us honest.
-              </p>
-            </article>
-          </div>
-
-          <div class="knowledge-row">
-            <div class="knowledge-copy">
-              <h3>What Ente knows about you</h3>
-              <p>
-                Less than your weather app, less than your shopping app, and
-                dramatically less than any company calling you part of an
-                ecosystem.
-              </p>
+        <section class="privacy-story" id="why" aria-labelledby="privacy-story-title">
+          <div class="privacy-story-sticky">
+            <div class="privacy-story-copy">
+              <span class="privacy-story-eyebrow">why ente?</span>
+              <h2 id="privacy-story-title">
+                <span>Most apps want to</span>
+                <span>
+                  know you better.
+                  <span class="devil-emoji" role="img" aria-label="Playful devil">
+                    <img src="./assets/why-ente-type-reference.png" alt="" />
+                  </span>
+                </span>
+              </h2>
+              <p>we don't. 🥱</p>
             </div>
 
-            <img
-              class="data-card-art"
-              src="./assets/why-ente-creative.png"
-              alt="Ente data minimization bottom sheet"
-            />
+            <div class="feature-playground" aria-label="Ente privacy features">
+              <article class="feature-object feature-encryption" data-feature="encryption">
+                <button
+                  class="feature-bubble"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="feature-card-encryption"
+                >
+                  <span class="feature-bubble-mark" aria-hidden="true">01</span>
+                  <span>Data is encrypted</span>
+                </button>
+                <div
+                  class="feature-card"
+                  id="feature-card-encryption"
+                  aria-hidden="true"
+                >
+                  <button class="feature-card-close" type="button" aria-label="Close encryption details">×</button>
+                  <div class="feature-card-copy">
+                    <span class="feature-card-kicker">On-device encryption</span>
+                    <h3>Locked before upload.</h3>
+                    <p>Your files are encrypted on your device. Ente never receives the keys.</p>
+                  </div>
+                  <div class="feature-visual feature-visual-lock" aria-hidden="true">
+                    <span class="lock-orbit"></span>
+                    <span class="lock-body"></span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="feature-object feature-ai" data-feature="ai">
+                <button
+                  class="feature-bubble"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="feature-card-ai"
+                >
+                  <span class="feature-bubble-mark" aria-hidden="true">02</span>
+                  <span>No AI training</span>
+                </button>
+                <div class="feature-card" id="feature-card-ai" aria-hidden="true">
+                  <button class="feature-card-close" type="button" aria-label="Close AI details">×</button>
+                  <div class="feature-card-copy">
+                    <span class="feature-card-kicker">Your memories stay yours</span>
+                    <h3>Not training material.</h3>
+                    <p>Private photos and documents never become somebody else's model input.</p>
+                  </div>
+                  <div class="feature-visual feature-visual-ai" aria-hidden="true">
+                    <span>family.jpg</span>
+                    <span>trip.mov</span>
+                    <strong>NO AI</strong>
+                  </div>
+                </div>
+              </article>
+
+              <article class="feature-object feature-source" data-feature="source">
+                <button
+                  class="feature-bubble"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="feature-card-source"
+                >
+                  <span class="feature-bubble-mark" aria-hidden="true">03</span>
+                  <span>Open source</span>
+                </button>
+                <div class="feature-card" id="feature-card-source" aria-hidden="true">
+                  <button class="feature-card-close" type="button" aria-label="Close open-source details">×</button>
+                  <div class="feature-card-copy">
+                    <span class="feature-card-kicker">Inspect every layer</span>
+                    <h3>Trust, but verify.</h3>
+                    <p>Our code, implementation and audits are open for anyone to inspect.</p>
+                  </div>
+                  <div class="feature-visual feature-visual-code" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i><i></i>
+                  </div>
+                </div>
+              </article>
+
+              <article class="feature-object feature-ads" data-feature="ads">
+                <button
+                  class="feature-bubble"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="feature-card-ads"
+                >
+                  <span class="feature-bubble-mark" aria-hidden="true">04</span>
+                  <span>No ads</span>
+                </button>
+                <div class="feature-card" id="feature-card-ads" aria-hidden="true">
+                  <button class="feature-card-close" type="button" aria-label="Close advertising details">×</button>
+                  <div class="feature-card-copy">
+                    <span class="feature-card-kicker">Attention not for sale</span>
+                    <h3>No audience profiling.</h3>
+                    <p>There is no ad engine watching what you open, save or remember.</p>
+                  </div>
+                  <div class="feature-visual feature-visual-ads" aria-hidden="true">
+                    <span>AD</span><span>AD</span><strong></strong>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <p class="privacy-story-hint" aria-hidden="true">Scroll to see why privacy feels lighter.</p>
           </div>
         </section>
 
@@ -316,7 +376,7 @@
           </p>
           <div class="card-actions">
             <a class="button button-dark" href="#footer">move your photos</a>
-            <a class="button button-light" href="#why">See migration guide</a>
+            <a class="button button-light" href="#products">See migration guide</a>
           </div>
 
           <div class="import-panel">
