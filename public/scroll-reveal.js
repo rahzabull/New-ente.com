@@ -116,6 +116,109 @@ const initTestimonialBackground = () => {
   backgroundObserver.observe(testimonials);
 };
 
+const initTestimonialHover = () => {
+  const testimonials = document.querySelector(".testimonials");
+  const track = testimonials?.querySelector(".testimonial-track");
+  const hoverCapable = window.matchMedia("(hover: hover) and (pointer: fine)");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (!testimonials || !track || !hoverCapable.matches || reduceMotion.matches) {
+    return;
+  }
+
+  const cursorPop = document.createElement("img");
+  cursorPop.className = "testimonial-cursor-pop";
+  cursorPop.src = "./assets/trusted-by-pop.svg";
+  cursorPop.alt = "";
+  cursorPop.setAttribute("aria-hidden", "true");
+  document.body.append(cursorPop);
+
+  let marqueeAnimation = null;
+  let targetRate = 1;
+  let currentRate = 1;
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let pointerActive = false;
+  let frame = 0;
+  let lastTime = 0;
+
+  const getMarqueeAnimation = () => {
+    if (!marqueeAnimation) {
+      marqueeAnimation = track
+        .getAnimations()
+        .find((animation) => animation.animationName === "testimonial-scroll-right");
+    }
+
+    return marqueeAnimation;
+  };
+
+  const positionCursor = (event, immediate = false) => {
+    const width = cursorPop.offsetWidth || 190;
+    const height = cursorPop.offsetHeight || 50;
+    targetX = clamp(event.clientX + 20, 10, window.innerWidth - width - 10);
+    targetY = clamp(event.clientY + 20, 10, window.innerHeight - height - 10);
+
+    if (immediate) {
+      currentX = targetX;
+      currentY = targetY;
+    }
+  };
+
+  const renderHover = (time = performance.now()) => {
+    frame = 0;
+    const delta = lastTime ? clamp(time - lastTime, 8, 34) : 16.667;
+    lastTime = time;
+    const rateDuration = targetRate === 0 ? 360 : 480;
+    const rateEase = 1 - Math.exp(-delta / rateDuration);
+    const cursorEase = 1 - Math.exp(-delta / 72);
+
+    currentRate += (targetRate - currentRate) * rateEase;
+    currentX += (targetX - currentX) * cursorEase;
+    currentY += (targetY - currentY) * cursorEase;
+
+    if (Math.abs(targetRate - currentRate) < 0.004) {
+      currentRate = targetRate;
+    }
+
+    getMarqueeAnimation()?.updatePlaybackRate(currentRate);
+    cursorPop.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(
+      2
+    )}px, 0) rotate(-3deg)`;
+
+    if (pointerActive || Math.abs(targetRate - currentRate) >= 0.004) {
+      frame = window.requestAnimationFrame(renderHover);
+    }
+  };
+
+  const requestHoverFrame = () => {
+    if (!frame) {
+      frame = window.requestAnimationFrame(renderHover);
+    }
+  };
+
+  testimonials.addEventListener("pointerenter", (event) => {
+    pointerActive = true;
+    targetRate = 0;
+    positionCursor(event, true);
+    cursorPop.classList.add("is-active");
+    requestHoverFrame();
+  });
+
+  testimonials.addEventListener("pointermove", (event) => {
+    positionCursor(event);
+    requestHoverFrame();
+  });
+
+  testimonials.addEventListener("pointerleave", () => {
+    pointerActive = false;
+    targetRate = 1;
+    cursorPop.classList.remove("is-active");
+    requestHoverFrame();
+  });
+};
+
 const initMobileTopbarFooterHandoff = () => {
   const footer = document.querySelector(".footer");
 
@@ -201,6 +304,8 @@ const initPrivacyStory = () => {
   if (!section || !sticky || !headline || !response || !objects.length) {
     return;
   }
+
+  const headlineLines = Array.from(headline.children);
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const hoverCapable = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -465,32 +570,50 @@ const initPrivacyStory = () => {
     const isMobile = window.innerWidth <= 820;
     const width = sticky.clientWidth;
     const height = sticky.clientHeight;
+    const introReveal = smoothstep(0, 0.13, storyProgress);
     const headlineMove = smoothstep(0.17, 0.43, storyProgress);
     const responseReveal = smoothstep(0.29, 0.48, storyProgress);
-    const endStateDrop = smoothstep(0.68, 0.9, storyProgress);
-    const endStateDropPercent = endStateDrop * (isMobile ? 5.5 : 8);
+    const endStateDropPercent = isMobile ? 5.5 : 8;
     const endStateDropPixels = height * (endStateDropPercent / 100);
     const initialHeadlineLeft = isMobile ? 6 : 15;
     const initialHeadlineTop = isMobile ? 30 : 36;
     const finalHeadlineLeft = isMobile ? 6 : 7.5;
-    const finalHeadlineTop = isMobile ? 12.5 : 12.5;
+    const finalHeadlineTop = 12.5 + endStateDropPercent;
     const finalHeadlineScale = isMobile ? 0.5 : 0.56;
     const headlineLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
     const headlineTop = initialHeadlineTop + (finalHeadlineTop - initialHeadlineTop) * headlineMove;
     const headlineScale = 1 + (finalHeadlineScale - 1) * headlineMove;
+    const introScale = 0.97 + introReveal * 0.03;
+    const introOffset = (1 - introReveal) * 18;
 
     headline.style.left = `${headlineLeft}%`;
-    headline.style.top = `${headlineTop + endStateDropPercent}%`;
+    headline.style.top = `${headlineTop}%`;
+    headline.style.opacity = "1";
     headline.style.textAlign = "left";
-    headline.style.transform = `scale(${headlineScale})`;
+    headline.style.transform = `translate3d(0, ${introOffset.toFixed(2)}px, 0) scale(${(
+      headlineScale * introScale
+    ).toFixed(4)})`;
+    headlineLines.forEach((line, index) => {
+      const lineReveal =
+        index === 0
+          ? smoothstep(0.045, 0.115, storyProgress)
+          : smoothstep(0.095, 0.17, storyProgress);
+      line.style.opacity = lineReveal > 0.01 ? "1" : "0";
+      line.style.clipPath = `inset(0 ${((1 - lineReveal) * 100).toFixed(2)}% 0 0)`;
+    });
     if (eyebrow) {
       const initialEyebrowTop = isMobile ? 22 : 28;
-      const finalEyebrowTop = isMobile ? 7.5 : 7.5;
+      const finalEyebrowTop = 7.5 + endStateDropPercent;
       const eyebrowLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
       const eyebrowTop = initialEyebrowTop + (finalEyebrowTop - initialEyebrowTop) * headlineMove;
       eyebrow.style.left = `${eyebrowLeft}%`;
-      eyebrow.style.top = `${eyebrowTop + endStateDropPercent}%`;
-      eyebrow.style.transform = `scale(${1 - headlineMove * 0.16})`;
+      eyebrow.style.top = `${eyebrowTop}%`;
+      eyebrow.style.opacity = "1";
+      eyebrow.style.transform = `translate3d(0, ${(
+        introOffset * 0.55
+      ).toFixed(2)}px, 0) scale(${(
+        (1.28 - introReveal * 0.28) * (1 - headlineMove * 0.16)
+      ).toFixed(4)})`;
       eyebrow.style.transformOrigin = "left top";
     }
     response.style.left = `${finalHeadlineLeft}%`;
@@ -655,6 +778,7 @@ const initParallax = () => {
 const initAnimations = () => {
   initScrollReveal();
   initTestimonialBackground();
+  initTestimonialHover();
   initMobileTopbarFooterHandoff();
   initSwitchGapStretch();
   initPrivacyStory();

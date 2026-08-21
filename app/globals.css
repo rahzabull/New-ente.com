@@ -941,6 +941,7 @@ main::before {
   font-size: clamp(1.15rem, 1.75vw, 1.55rem);
   letter-spacing: -0.055em;
   line-height: 1;
+  opacity: 0;
 }
 
 .privacy-story-copy h2 {
@@ -951,6 +952,7 @@ main::before {
   letter-spacing: -0.075em;
   line-height: 0.84;
   text-align: left;
+  opacity: 0;
   transform: none;
   transform-origin: left top;
 }
@@ -958,6 +960,7 @@ main::before {
 .privacy-story-copy h2 > span {
   display: block;
   white-space: nowrap;
+  will-change: clip-path;
 }
 
 .privacy-story-copy p {
@@ -1025,6 +1028,11 @@ main::before {
   --feature-fg: #171200;
 }
 
+.feature-ai .feature-bubble {
+  background: #c98500;
+  text-shadow: 0 1px 2px rgba(43, 25, 0, 0.24);
+}
+
 .feature-source {
   --feature-bg: #1685ff;
   --feature-fg: #ffffff;
@@ -1050,7 +1058,7 @@ main::before {
   border: 3px solid #101010;
   border-radius: 999px;
   background: var(--feature-bg);
-  color: var(--feature-fg);
+  color: #ffffff;
   box-shadow: 0 9px 0 #101010;
   font: inherit;
   font-size: clamp(1.25rem, 1.8vw, 1.6rem);
@@ -1670,10 +1678,6 @@ main::before {
   min-width: var(--viewport-inline-size);
 }
 
-.testimonial-grid:hover .testimonial-track {
-  animation-play-state: paused;
-}
-
 .quote-card {
   flex: none;
   width: calc(
@@ -1715,6 +1719,32 @@ main::before {
   color: #9f9f9f;
   font-size: 1.25rem;
   font-weight: 500;
+}
+
+.testimonial-cursor-pop {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: clamp(155px, 15vw, 205px);
+  height: auto;
+  opacity: 0;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+  transform: translate3d(-300px, -300px, 0) rotate(-3deg);
+  transform-origin: 12% 18%;
+  transition: opacity 240ms ease;
+  will-change: transform, opacity;
+}
+
+.testimonial-cursor-pop.is-active {
+  opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .testimonial-cursor-pop {
+    display: none;
+  }
 }
 
 .switch .card-actions {
