@@ -1822,8 +1822,8 @@ main::before {
 }
 
 .testimonial-cursor-pop {
-  position: fixed;
-  z-index: 1000;
+  position: absolute;
+  z-index: 10;
   top: 0;
   left: 0;
   width: clamp(155px, 15vw, 205px);
@@ -1833,12 +1833,19 @@ main::before {
   pointer-events: none;
   transform: translate3d(-300px, -300px, 0) rotate(-3deg);
   transform-origin: 12% 18%;
-  transition: opacity 240ms ease;
+  visibility: hidden;
+  transition:
+    opacity 105ms ease-out,
+    visibility 0s linear 105ms;
   will-change: transform, opacity;
 }
 
 .testimonial-cursor-pop.is-active {
   opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 85ms ease-out,
+    visibility 0s linear 0s;
 }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {

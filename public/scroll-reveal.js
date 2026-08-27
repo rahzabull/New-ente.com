@@ -131,7 +131,7 @@ const initTestimonialHover = () => {
   cursorPop.src = "./assets/trusted-by-pop.svg";
   cursorPop.alt = "";
   cursorPop.setAttribute("aria-hidden", "true");
-  document.body.append(cursorPop);
+  testimonials.append(cursorPop);
 
   let marqueeAnimation = null;
   let targetRate = 1;
@@ -140,6 +140,8 @@ const initTestimonialHover = () => {
   let targetY = 0;
   let currentX = 0;
   let currentY = 0;
+  let pointerX = 0;
+  let pointerY = 0;
   let pointerActive = false;
   let frame = 0;
   let lastTime = 0;
@@ -154,11 +156,23 @@ const initTestimonialHover = () => {
     return marqueeAnimation;
   };
 
-  const positionCursor = (event, immediate = false) => {
+  const isPointerInside = () => {
+    const bounds = testimonials.getBoundingClientRect();
+
+    return (
+      pointerX >= bounds.left &&
+      pointerX <= bounds.right &&
+      pointerY >= bounds.top &&
+      pointerY <= bounds.bottom
+    );
+  };
+
+  const positionCursor = (clientX, clientY, immediate = false) => {
+    const bounds = testimonials.getBoundingClientRect();
     const width = cursorPop.offsetWidth || 190;
     const height = cursorPop.offsetHeight || 50;
-    targetX = clamp(event.clientX + 20, 10, window.innerWidth - width - 10);
-    targetY = clamp(event.clientY + 20, 10, window.innerHeight - height - 10);
+    targetX = clamp(clientX - bounds.left + 20, 10, testimonials.clientWidth - width - 10);
+    targetY = clamp(clientY - bounds.top + 20, 10, testimonials.clientHeight - height - 10);
 
     if (immediate) {
       currentX = targetX;
@@ -198,25 +212,53 @@ const initTestimonialHover = () => {
     }
   };
 
+  const hideCursor = () => {
+    if (!pointerActive && !cursorPop.classList.contains("is-active")) {
+      return;
+    }
+
+    pointerActive = false;
+    targetRate = 1;
+    cursorPop.classList.remove("is-active");
+    requestHoverFrame();
+  };
+
   testimonials.addEventListener("pointerenter", (event) => {
+    pointerX = event.clientX;
+    pointerY = event.clientY;
     pointerActive = true;
     targetRate = 0;
-    positionCursor(event, true);
+    positionCursor(pointerX, pointerY, true);
     cursorPop.classList.add("is-active");
     requestHoverFrame();
   });
 
   testimonials.addEventListener("pointermove", (event) => {
-    positionCursor(event);
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    positionCursor(pointerX, pointerY);
     requestHoverFrame();
   });
 
-  testimonials.addEventListener("pointerleave", () => {
-    pointerActive = false;
-    targetRate = 1;
-    cursorPop.classList.remove("is-active");
-    requestHoverFrame();
-  });
+  testimonials.addEventListener("pointerleave", hideCursor);
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!pointerActive) {
+        return;
+      }
+
+      if (!isPointerInside()) {
+        hideCursor();
+        return;
+      }
+
+      positionCursor(pointerX, pointerY);
+      requestHoverFrame();
+    },
+    { passive: true }
+  );
 };
 
 const initMobileTopbarFooterHandoff = () => {
@@ -358,13 +400,24 @@ const initPrivacyStory = () => {
   }));
   const pointer = { x: 0, y: 0, active: false };
   let activeFeature = "";
+  let activeOpenedAt = 0;
+  let hoverCloseTimer = 0;
   let storyProgress = 0;
   let frame = 0;
   let lastTime = 0;
   let isNearViewport = false;
 
+  const clearHoverClose = () => {
+    if (hoverCloseTimer) {
+      window.clearTimeout(hoverCloseTimer);
+      hoverCloseTimer = 0;
+    }
+  };
+
   const setActiveFeature = (feature = "") => {
+    clearHoverClose();
     activeFeature = activeFeature === feature ? "" : feature;
+    activeOpenedAt = activeFeature ? performance.now() : 0;
     section.dataset.active = activeFeature;
 
     objects.forEach((object) => {
@@ -377,12 +430,29 @@ const initPrivacyStory = () => {
     requestTick();
   };
 
+  const scheduleHoverClose = (delay = 160) => {
+    clearHoverClose();
+    const featureAtSchedule = activeFeature;
+
+    if (!featureAtSchedule) {
+      return;
+    }
+
+    hoverCloseTimer = window.setTimeout(() => {
+      hoverCloseTimer = 0;
+      if (activeFeature === featureAtSchedule) {
+        setActiveFeature("");
+      }
+    }, delay);
+  };
+
   objects.forEach((object) => {
     const feature = object.dataset.feature;
     const bubble = object.querySelector(".feature-bubble");
     const close = object.querySelector(".feature-card-close");
 
     object.addEventListener("pointerenter", () => {
+      clearHoverClose();
       if (
         hoverCapable.matches &&
         (reduceMotion.matches || storyProgress > 0.62) &&
@@ -398,7 +468,9 @@ const initPrivacyStory = () => {
         activeFeature === feature &&
         !object.contains(event.relatedTarget)
       ) {
-        setActiveFeature("");
+        if (performance.now() - activeOpenedAt > 440) {
+          scheduleHoverClose(170);
+        }
       }
     });
 
@@ -444,11 +516,39 @@ const initPrivacyStory = () => {
     pointer.x = event.clientX - bounds.left;
     pointer.y = event.clientY - bounds.top;
     pointer.active = true;
+
+    if (activeFeature && performance.now() - activeOpenedAt > 440) {
+      const activeObject = objects.find(({ dataset }) => dataset.feature === activeFeature);
+      const activeSurfaces = [
+        activeObject?.querySelector(".feature-bubble"),
+        activeObject?.querySelector(".feature-card")
+      ].filter(Boolean);
+      const isInsideActiveSurface = activeSurfaces.some((surface) => {
+        const surfaceBounds = surface.getBoundingClientRect();
+        const margin = 14;
+        return (
+          event.clientX >= surfaceBounds.left - margin &&
+          event.clientX <= surfaceBounds.right + margin &&
+          event.clientY >= surfaceBounds.top - margin &&
+          event.clientY <= surfaceBounds.bottom + margin
+        );
+      });
+
+      if (isInsideActiveSurface) {
+        clearHoverClose();
+      } else {
+        scheduleHoverClose(190);
+      }
+    }
+
     requestTick();
   });
 
   sticky.addEventListener("pointerleave", () => {
     pointer.active = false;
+    if (hoverCapable.matches && activeFeature) {
+      scheduleHoverClose(130);
+    }
     requestTick();
   });
 
@@ -704,10 +804,10 @@ const initPrivacyStory = () => {
         state.initialized = true;
       }
 
-      springValue(state, "x", "vx", target.x, delta, 0.085, 0.72);
-      springValue(state, "y", "vy", target.y, delta, 0.085, 0.72);
-      springValue(state, "scale", "vs", target.scale, delta, 0.11, 0.7);
-      springValue(state, "rotation", "vr", target.rotation, delta, 0.1, 0.7);
+      springValue(state, "x", "vx", target.x, delta, 0.06, 0.76);
+      springValue(state, "y", "vy", target.y, delta, 0.06, 0.76);
+      springValue(state, "scale", "vs", target.scale, delta, 0.075, 0.74);
+      springValue(state, "rotation", "vr", target.rotation, delta, 0.065, 0.74);
 
       objects[index].style.opacity = target.opacity.toFixed(3);
       objects[index].style.pointerEvents = target.opacity > 0.82 ? "auto" : "none";
