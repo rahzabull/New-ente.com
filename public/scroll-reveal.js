@@ -300,6 +300,7 @@ const initPrivacyStory = () => {
   const response = section?.querySelector(".privacy-story-copy p");
   const hint = section?.querySelector(".privacy-story-hint");
   const objects = Array.from(section?.querySelectorAll(".feature-object") || []);
+  const stones = Array.from(section?.querySelectorAll(".privacy-stones span") || []);
 
   if (!section || !sticky || !headline || !response || !objects.length) {
     return;
@@ -332,6 +333,30 @@ const initPrivacyStory = () => {
     vr: 0,
     initialized: false
   }));
+  const stonePositions = [
+    [0.18, 0.5],
+    [0.43, 0.43],
+    [0.79, 0.46],
+    [0.84, 0.64],
+    [0.72, 0.77],
+    [0.56, 0.8],
+    [0.34, 0.76],
+    [0.2, 0.68],
+    [0.53, 0.57],
+    [0.88, 0.55]
+  ];
+  const stoneStates = stones.map(() => ({
+    x: 0,
+    y: 0,
+    scale: 0.5,
+    rotation: 0,
+    vx: 0,
+    vy: 0,
+    vs: 0,
+    vr: 0,
+    initialized: false
+  }));
+  const pointer = { x: 0, y: 0, active: false };
   let activeFeature = "";
   let storyProgress = 0;
   let frame = 0;
@@ -408,6 +433,23 @@ const initPrivacyStory = () => {
       setActiveFeature("");
       activeObject?.querySelector(".feature-bubble")?.focus({ preventScroll: true });
     }
+  });
+
+  sticky.addEventListener("pointermove", (event) => {
+    if (!hoverCapable.matches) {
+      return;
+    }
+
+    const bounds = sticky.getBoundingClientRect();
+    pointer.x = event.clientX - bounds.left;
+    pointer.y = event.clientY - bounds.top;
+    pointer.active = true;
+    requestTick();
+  });
+
+  sticky.addEventListener("pointerleave", () => {
+    pointer.active = false;
+    requestTick();
   });
 
   if (reduceMotion.matches) {
@@ -605,8 +647,8 @@ const initPrivacyStory = () => {
     headlineLines.forEach((line, index) => {
       const lineReveal =
         index === 0
-          ? smoothstep(0, 0.72, introProgress)
-          : smoothstep(0.2, 1, introProgress);
+          ? smoothstep(0, 0.44, introProgress)
+          : smoothstep(0.52, 1, introProgress);
       line.style.opacity = lineReveal > 0.01 ? "1" : "0";
       line.style.clipPath = `inset(0 ${((1 - lineReveal) * 100).toFixed(2)}% 0 0)`;
     });
@@ -670,6 +712,58 @@ const initPrivacyStory = () => {
       objects[index].style.opacity = target.opacity.toFixed(3);
       objects[index].style.pointerEvents = target.opacity > 0.82 ? "auto" : "none";
       objects[index].style.transform = `translate3d(${state.x.toFixed(2)}px, ${state.y.toFixed(2)}px, 0) rotate(${state.rotation.toFixed(3)}deg) scale(${state.scale.toFixed(4)})`;
+    });
+
+    stones.forEach((stone, index) => {
+      const reveal = smoothstep(
+        0.54 + index * 0.012,
+        0.69 + index * 0.012,
+        storyProgress
+      );
+      const [baseX, baseY] = stonePositions[index] || [0.5, 0.7];
+      const phase = time * (0.00072 + index * 0.000045) + index * 1.31;
+      let targetX = width * baseX + Math.sin(phase) * (isMobile ? 5 : 12);
+      let targetY =
+        height * baseY +
+        endStateDropPixels +
+        Math.cos(phase * 1.17) * (isMobile ? 7 : 15);
+      let targetRotation = Math.sin(phase * 0.83) * (isMobile ? 3 : 6) + index * 7;
+
+      if (pointer.active && reveal > 0.8) {
+        const dx = targetX - pointer.x;
+        const dy = targetY - pointer.y;
+        const distance = Math.max(Math.hypot(dx, dy), 1);
+        const radius = isMobile ? 105 : 175;
+
+        if (distance < radius) {
+          const force = Math.pow(1 - distance / radius, 2);
+          const push = force * (isMobile ? 34 : 78);
+          targetX += (dx / distance) * push;
+          targetY += (dy / distance) * push;
+          targetRotation += (dx / distance) * force * 18;
+        }
+      }
+
+      targetX = clamp(targetX, 24, width - 24);
+      targetY = clamp(targetY, height * 0.39, height - 34);
+      const targetScale = 0.62 + reveal * (isMobile ? 0.2 : 0.38);
+      const state = stoneStates[index];
+
+      if (!state.initialized) {
+        state.x = targetX;
+        state.y = targetY;
+        state.scale = targetScale;
+        state.rotation = targetRotation;
+        state.initialized = true;
+      }
+
+      springValue(state, "x", "vx", targetX, delta, 0.072, 0.76);
+      springValue(state, "y", "vy", targetY, delta, 0.072, 0.76);
+      springValue(state, "scale", "vs", targetScale, delta, 0.1, 0.72);
+      springValue(state, "rotation", "vr", targetRotation, delta, 0.075, 0.75);
+
+      stone.style.opacity = (reveal * (activeFeature ? 0.48 : 0.92)).toFixed(3);
+      stone.style.transform = `translate3d(${state.x.toFixed(2)}px, ${state.y.toFixed(2)}px, 0) translate(-50%, -50%) rotate(${state.rotation.toFixed(3)}deg) scale(${state.scale.toFixed(4)})`;
     });
 
     section.dataset.stage = storyProgress < 0.28 ? "intro" : storyProgress < 0.52 ? "response" : "features";

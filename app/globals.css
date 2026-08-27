@@ -1001,6 +1001,93 @@ main::before {
   inset: 0;
 }
 
+.privacy-stones {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.privacy-stones span {
+  --stone-color: #00cb3f;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 30px;
+  border: 3px solid #101010;
+  border-radius: 58% 42% 55% 45% / 48% 57% 43% 52%;
+  background: var(--stone-color);
+  box-shadow:
+    0 6px 0 #101010,
+    inset 7px 6px 0 rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.privacy-stones span:nth-child(2),
+.privacy-stones span:nth-child(7) {
+  --stone-color: #c98500;
+}
+
+.privacy-stones span:nth-child(3),
+.privacy-stones span:nth-child(8) {
+  --stone-color: #1685ff;
+}
+
+.privacy-stones span:nth-child(4),
+.privacy-stones span:nth-child(9) {
+  --stone-color: #ff7048;
+}
+
+.privacy-stones span:nth-child(5) {
+  --stone-color: #e7e7e7;
+}
+
+.privacy-stones span:nth-child(2) {
+  width: 30px;
+  height: 24px;
+}
+
+.privacy-stones span:nth-child(3) {
+  width: 54px;
+  height: 34px;
+}
+
+.privacy-stones span:nth-child(4) {
+  width: 34px;
+  height: 42px;
+}
+
+.privacy-stones span:nth-child(5),
+.privacy-stones span:nth-child(8) {
+  width: 25px;
+  height: 25px;
+  border-radius: 48% 52% 46% 54%;
+}
+
+.privacy-stones span:nth-child(6) {
+  width: 48px;
+  height: 28px;
+}
+
+.privacy-stones span:nth-child(7) {
+  width: 37px;
+  height: 31px;
+}
+
+.privacy-stones span:nth-child(9) {
+  width: 29px;
+  height: 38px;
+}
+
+.privacy-stones span:nth-child(10) {
+  --stone-color: #00cb3f;
+  width: 46px;
+  height: 32px;
+}
+
 .feature-object {
   --feature-bg: #0bcc46;
   --feature-fg: #ffffff;
@@ -1409,6 +1496,14 @@ main::before {
     font-size: 0.58rem;
   }
 
+  .privacy-stones span {
+    border-width: 2px;
+    box-shadow:
+      0 4px 0 #101010,
+      inset 5px 4px 0 rgba(255, 255, 255, 0.2);
+    scale: 0.72;
+  }
+
   .feature-card {
     width: calc(var(--viewport-inline-size) - 32px);
     min-height: 360px;
@@ -1503,6 +1598,10 @@ main::before {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
     margin-top: 64px;
+  }
+
+  .privacy-stones {
+    display: none;
   }
 
   .feature-object {
