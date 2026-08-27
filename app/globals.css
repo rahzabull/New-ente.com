@@ -239,14 +239,20 @@ main::before {
 .hero-copy {
   grid-column: 2 / 4;
   align-self: start;
-  max-width: 560px;
+  max-width: 780px;
   padding-top: 5%;
+  transform: translate(-10%, 70%);
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(5.2rem, 7.2vw, 6.7rem);
+  font-size: clamp(3.75rem, 4.8vw, 4.25rem);
   line-height: 0.88;
+}
+
+.hero h1 span {
+  display: block;
+  white-space: nowrap;
 }
 
 .hero-subtitle {
@@ -2271,6 +2277,14 @@ main::before {
   .hero,
   .switch {
     padding-top: 54px;
+  }
+
+  .hero h1 {
+    font-size: min(8vw, 3.75rem);
+  }
+
+  .hero-copy {
+    transform: translate(0, 70%);
   }
 
   .switch {
