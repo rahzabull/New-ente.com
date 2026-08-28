@@ -2219,13 +2219,14 @@ main::before {
 }
 
 .footer-top {
+  --footer-top-drop: clamp(58px, 5vw, 78px);
   position: relative;
   z-index: 4;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 48px;
-  transform: translateY(clamp(130px, 12vw, 180px));
+  translate: 0 calc(var(--footer-top-drop) + var(--parallax-y, 0px));
 }
 
 .footer-top p {
@@ -2354,8 +2355,9 @@ main::before {
   }
 
   .footer-top {
+    --footer-top-drop: 0px;
     grid-template-columns: 1fr;
-    transform: translateY(48px);
+    translate: 0 var(--parallax-y, 0px);
   }
 
   .footer > .footer-community {
@@ -2617,7 +2619,7 @@ main::before {
 
   .footer-top {
     gap: 32px;
-    transform: none;
+    translate: 0 var(--parallax-y, 0px);
   }
 
   .footer-top p {
