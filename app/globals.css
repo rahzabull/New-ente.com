@@ -2219,7 +2219,7 @@ main::before {
 }
 
 .footer-top {
-  --footer-top-drop: clamp(58px, 5vw, 78px);
+  --footer-top-drop: clamp(88px, 7vw, 112px);
   position: relative;
   z-index: 4;
   display: grid;
