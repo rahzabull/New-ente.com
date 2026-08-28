@@ -19,6 +19,8 @@ const revealGroups = [
   { selector: ".testimonial-grid", step: 0, variant: "reveal-zoom" },
   { selector: ".switch > .eyebrow, .switch > h2, .switch > .lede, .switch > .card-actions", step: 90, variant: "reveal-slide-left" },
   { selector: ".switch > .import-panel", step: 220, variant: "reveal-zoom" },
+  { selector: ".toys > .toys-heading", step: 0, variant: "reveal-slide-left" },
+  { selector: ".toys > .toys-carousel", step: 0, variant: "reveal-zoom" },
   { selector: ".footer > .footer-top", step: 0, variant: "reveal-slide-left" },
   { selector: ".footer > .footer-community", step: 120, variant: "reveal-slide-left" },
   { selector: ".footer > .footer-socials", step: 220, variant: "reveal-slide-right" }
@@ -1106,6 +1108,178 @@ const initFooterElastic = () => {
   });
 };
 
+const initToysCarousel = () => {
+  const carousel = document.querySelector("[data-toys-carousel]");
+
+  if (!carousel) {
+    return;
+  }
+
+  const viewport = carousel.querySelector(".toys-viewport");
+  const track = carousel.querySelector(".toys-track");
+  const originals = [...carousel.querySelectorAll(".toy-card")];
+  const previous = carousel.querySelector("[data-toys-prev]");
+  const next = carousel.querySelector("[data-toys-next]");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let cards = [];
+  let setWidth = 0;
+  let offset = 0;
+  let impulse = 0;
+  let cruiseSpeed = 25;
+  let targetCruiseSpeed = 25;
+  let lastTime = performance.now();
+  let resizeFrame = 0;
+  let animationFrame = 0;
+  let isVisible = true;
+
+  const before = document.createDocumentFragment();
+  const after = document.createDocumentFragment();
+
+  originals.forEach((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    before.append(clone);
+  });
+
+  originals.forEach((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    after.append(clone);
+  });
+
+  track.prepend(before);
+  track.append(after);
+  cards = [...track.querySelectorAll(".toy-card")];
+
+  const wrapOffset = () => {
+    if (!setWidth) {
+      return;
+    }
+
+    while (offset >= 0) {
+      offset -= setWidth;
+    }
+
+    while (offset < -setWidth * 2) {
+      offset += setWidth;
+    }
+  };
+
+  const updateFocus = () => {
+    const liveSetWidth = cards[originals.length].offsetLeft - cards[0].offsetLeft;
+
+    if (liveSetWidth > 0) {
+      setWidth = liveSetWidth;
+    }
+
+    const viewportWidth = viewport.clientWidth;
+    const center = viewportWidth / 2;
+    const plateau = Math.min(215, viewportWidth * 0.2);
+    const falloff = Math.max(150, viewportWidth * 0.32);
+    const compact = viewportWidth < 620;
+    const minimumScale = compact ? 0.84 : 0.86;
+    const maximumScale = compact ? 1.08 : 1.14;
+
+    const cardStates = cards.map((card) => {
+      const cardCenter = card.offsetLeft + offset + card.offsetWidth / 2;
+      const distance = Math.abs(cardCenter - center);
+      const progress = 1 - clamp((distance - plateau) / falloff, 0, 1);
+      const eased = progress * progress * (3 - 2 * progress);
+      const scale = minimumScale + (maximumScale - minimumScale) * eased;
+      const lift = -10 * eased;
+      const rotation = ((cardCenter - center) / Math.max(viewportWidth, 1)) * 1.2;
+
+      return { card, eased, lift, rotation, scale };
+    });
+
+    cardStates.forEach(({ card, eased, lift, rotation, scale }) => {
+      const spacing = ((scale - 1) * card.offsetWidth) / 2;
+
+      card.style.transform = `translate3d(0, ${lift.toFixed(2)}px, 0) scale(${scale.toFixed(4)}) rotate(${rotation.toFixed(3)}deg)`;
+      card.style.marginInline = `${spacing.toFixed(2)}px`;
+      card.style.zIndex = String(Math.round(eased * 10));
+    });
+  };
+
+  const measure = () => {
+    const first = cards[0];
+    const repeatedFirst = cards[originals.length];
+
+    setWidth = repeatedFirst.offsetLeft - first.offsetLeft;
+    offset = -setWidth;
+    impulse = 0;
+    track.style.setProperty("--toys-offset", `${offset}px`);
+    updateFocus();
+  };
+
+  const nudge = (direction) => {
+    if (reducedMotion.matches) {
+      const step = (cards[0]?.offsetWidth || 220) + 24;
+      offset += step * direction;
+      wrapOffset();
+      track.style.setProperty("--toys-offset", `${offset}px`);
+      updateFocus();
+      return;
+    }
+
+    impulse += direction * 380;
+  };
+
+  const animate = (now) => {
+    const delta = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    if (isVisible && !document.hidden && !reducedMotion.matches) {
+      const speedEase = 1 - Math.exp(-7 * delta);
+      cruiseSpeed += (targetCruiseSpeed - cruiseSpeed) * speedEase;
+      offset += (cruiseSpeed + impulse) * delta;
+      impulse *= Math.pow(0.055, delta);
+      wrapOffset();
+      track.style.setProperty("--toys-offset", `${offset}px`);
+      updateFocus();
+    }
+
+    animationFrame = window.requestAnimationFrame(animate);
+  };
+
+  previous.disabled = false;
+  next.disabled = false;
+  previous.addEventListener("click", () => nudge(-1));
+  next.addEventListener("click", () => nudge(1));
+
+  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    carousel.addEventListener("pointerenter", () => {
+      targetCruiseSpeed = 0;
+    });
+
+    carousel.addEventListener("pointerleave", () => {
+      targetCruiseSpeed = 25;
+    });
+  }
+
+  carousel.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+      previous.click();
+    } else if (event.key === "ArrowRight") {
+      next.click();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    window.cancelAnimationFrame(resizeFrame);
+    resizeFrame = window.requestAnimationFrame(measure);
+  }, { passive: true });
+
+  const observer = new IntersectionObserver(([entry]) => {
+    isVisible = entry.isIntersecting;
+    lastTime = performance.now();
+  }, { rootMargin: "20% 0px" });
+
+  observer.observe(carousel);
+  measure();
+  animationFrame = window.requestAnimationFrame(animate);
+};
+
 const initAnimations = () => {
   initScrollReveal();
   initTestimonialBackground();
@@ -1115,6 +1289,7 @@ const initAnimations = () => {
   initPrivacyStory();
   initParallax();
   initFooterElastic();
+  initToysCarousel();
 };
 
 if (document.readyState === "loading") {

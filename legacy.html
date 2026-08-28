@@ -15,7 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
-    <script src="./scroll-reveal.js" defer></script>
+    <script src="./scroll-reveal.js?v=24" defer></script>
   </head>
   <body>
     <div class="site-shell">
@@ -389,6 +389,44 @@
               src="./assets/migration-inside-creative.svg"
               alt="Ente migration flow illustration"
             />
+          </div>
+        </section>
+
+        <section class="toys" id="toys" aria-labelledby="toys-title">
+          <header class="toys-heading">
+            <p>ente</p>
+            <h2 id="toys-title">Toys<span aria-hidden="true">🧸</span></h2>
+          </header>
+
+          <div class="toys-carousel" data-toys-carousel>
+            <button
+              class="toys-arrow toys-arrow-prev"
+              type="button"
+              aria-label="Show previous Ente toys"
+              data-toys-prev
+            >
+              <img src="./assets/toys-arrow.svg" alt="" aria-hidden="true" />
+            </button>
+
+            <div class="toys-viewport">
+              <div class="toys-track">
+                <article class="toy-card toy-card-small" aria-label="Ente toy preview coming soon"></article>
+                <article class="toy-card" aria-label="Ente toy preview coming soon"></article>
+                <article class="toy-card" aria-label="Ente toy preview coming soon"></article>
+                <article class="toy-card toy-card-small" aria-label="Ente toy preview coming soon"></article>
+                <article class="toy-card" aria-label="Ente toy preview coming soon"></article>
+                <article class="toy-card toy-card-small" aria-label="Ente toy preview coming soon"></article>
+              </div>
+            </div>
+
+            <button
+              class="toys-arrow toys-arrow-next"
+              type="button"
+              aria-label="Show next Ente toys"
+              data-toys-next
+            >
+              <img src="./assets/toys-arrow.svg" alt="" aria-hidden="true" />
+            </button>
           </div>
         </section>
 
