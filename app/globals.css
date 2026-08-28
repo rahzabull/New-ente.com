@@ -1698,12 +1698,71 @@ main::before {
 }
 
 .toys-carousel {
+  position: relative;
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr) 56px;
   align-items: center;
   gap: clamp(16px, 2vw, 30px);
   width: calc(100% + 64px);
   margin-top: clamp(84px, 9vw, 132px);
+}
+
+.toy-confetti-layer {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.toy-confetti {
+  position: absolute;
+  top: var(--confetti-origin-y);
+  left: var(--confetti-origin-x);
+  width: var(--confetti-size);
+  height: calc(var(--confetti-size) * 0.48);
+  border-radius: 2px;
+  background: var(--confetti-color);
+  opacity: 0;
+  animation: toy-confetti-burst var(--confetti-duration)
+    cubic-bezier(0.16, 0.78, 0.24, 1) var(--confetti-delay) forwards;
+  will-change: transform, opacity;
+}
+
+.toy-confetti:nth-child(3n) {
+  height: var(--confetti-size);
+  border-radius: 50%;
+}
+
+@keyframes toy-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.35) rotate(0deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  62% {
+    opacity: 1;
+    transform: translate3d(
+        calc(-50% + var(--confetti-dx)),
+        calc(-50% + var(--confetti-rise-y)),
+        0
+      )
+      scale(1) rotate(var(--confetti-rotation));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(
+        calc(-50% + var(--confetti-dx)),
+        calc(-50% + var(--confetti-fall-y)),
+        0
+      )
+      scale(0.72) rotate(var(--confetti-final-rotation));
+  }
 }
 
 .toys-viewport {
@@ -1810,6 +1869,10 @@ main::before {
   .toy-card,
   .toys-arrow {
     transition: none;
+  }
+
+  .toy-confetti-layer {
+    display: none;
   }
 }
 

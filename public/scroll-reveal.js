@@ -1121,6 +1121,9 @@ const initToysCarousel = () => {
   const previous = carousel.querySelector("[data-toys-prev]");
   const next = carousel.querySelector("[data-toys-next]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const confettiLayer = document.createElement("div");
+  const confettiCooldowns = new WeakMap();
+  const confettiColors = ["#06e600", "#156df4", "#b000ff", "#ffd106", "#ff7043", "#5965f2"];
   let cards = [];
   let setWidth = 0;
   let offset = 0;
@@ -1131,6 +1134,57 @@ const initToysCarousel = () => {
   let resizeFrame = 0;
   let animationFrame = 0;
   let isVisible = true;
+
+  confettiLayer.className = "toy-confetti-layer";
+  confettiLayer.setAttribute("aria-hidden", "true");
+  carousel.append(confettiLayer);
+
+  const burstConfetti = (card) => {
+    if (reducedMotion.matches) {
+      return;
+    }
+
+    const now = performance.now();
+    const lastBurst = confettiCooldowns.get(card) || 0;
+
+    if (now - lastBurst < 420) {
+      return;
+    }
+
+    confettiCooldowns.set(card, now);
+    const cardBounds = card.getBoundingClientRect();
+    const carouselBounds = carousel.getBoundingClientRect();
+    const originX = cardBounds.left - carouselBounds.left + cardBounds.width / 2;
+    const originY = cardBounds.top - carouselBounds.top + cardBounds.height * 0.48;
+    const count = 22;
+
+    for (let index = 0; index < count; index += 1) {
+      const particle = document.createElement("span");
+      const angle = (Math.PI * 2 * index) / count + (Math.random() - 0.5) * 0.42;
+      const force = 58 + Math.random() * 76;
+      const dx = Math.cos(angle) * force;
+      const dy = Math.sin(angle) * force - 24;
+      const duration = 680 + Math.random() * 260;
+      const delay = Math.random() * 55;
+
+      particle.className = "toy-confetti";
+      particle.style.setProperty("--confetti-origin-x", `${originX.toFixed(2)}px`);
+      particle.style.setProperty("--confetti-origin-y", `${originY.toFixed(2)}px`);
+      particle.style.setProperty("--confetti-dx", `${dx.toFixed(2)}px`);
+      particle.style.setProperty("--confetti-rise-y", `${dy.toFixed(2)}px`);
+      particle.style.setProperty("--confetti-fall-y", `${(dy + 62 + Math.random() * 34).toFixed(2)}px`);
+      const rotation = Math.round((Math.random() - 0.5) * 720);
+      particle.style.setProperty("--confetti-rotation", `${rotation}deg`);
+      particle.style.setProperty("--confetti-final-rotation", `${Math.round(rotation * 1.45)}deg`);
+      particle.style.setProperty("--confetti-size", `${Math.round(7 + Math.random() * 7)}px`);
+      particle.style.setProperty("--confetti-color", confettiColors[index % confettiColors.length]);
+      particle.style.setProperty("--confetti-duration", `${duration.toFixed(0)}ms`);
+      particle.style.setProperty("--confetti-delay", `${delay.toFixed(0)}ms`);
+      confettiLayer.append(particle);
+
+      window.setTimeout(() => particle.remove(), duration + delay + 100);
+    }
+  };
 
   const before = document.createDocumentFragment();
   const after = document.createDocumentFragment();
@@ -1150,6 +1204,16 @@ const initToysCarousel = () => {
   track.prepend(before);
   track.append(after);
   cards = [...track.querySelectorAll(".toy-card")];
+
+  track.addEventListener("pointerover", (event) => {
+    const card = event.target.closest(".toy-card");
+
+    if (!card || !track.contains(card) || card.contains(event.relatedTarget)) {
+      return;
+    }
+
+    burstConfetti(card);
+  });
 
   const wrapOffset = () => {
     if (!setWidth) {
