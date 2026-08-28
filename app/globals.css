@@ -237,16 +237,18 @@ main::before {
 }
 
 .hero-copy {
+  position: relative;
   grid-column: 2 / 4;
   align-self: start;
+  top: clamp(64px, 6vw, 86px);
+  left: clamp(-180px, -13vw, -120px);
   max-width: 780px;
   padding-top: 5%;
-  transform: translate(-10%, 70%);
 }
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(3.75rem, 4.8vw, 4.25rem);
+  font-size: clamp(4.875rem, 6.24vw, 5.525rem);
   line-height: 0.88;
 }
 
@@ -2172,6 +2174,11 @@ main::before {
     grid-column: auto;
   }
 
+  .hero-copy {
+    top: 54px;
+    left: 0;
+  }
+
   .hero-side {
     max-width: none;
   }
@@ -2280,11 +2287,7 @@ main::before {
   }
 
   .hero h1 {
-    font-size: min(8vw, 3.75rem);
-  }
-
-  .hero-copy {
-    transform: translate(0, 70%);
+    font-size: min(8.6vw, 4.875rem);
   }
 
   .switch {
