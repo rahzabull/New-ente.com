@@ -1684,6 +1684,7 @@ main::before {
 }
 
 .toys h2 {
+  width: fit-content;
   margin: 42px 0 0;
   font-size: clamp(5.4rem, 7.4vw, 7.5rem);
   line-height: 0.78;
@@ -1725,7 +1726,7 @@ main::before {
   background: var(--confetti-color);
   opacity: 0;
   animation: toy-confetti-burst var(--confetti-duration)
-    cubic-bezier(0.16, 0.78, 0.24, 1) var(--confetti-delay) forwards;
+    linear var(--confetti-delay) forwards;
   will-change: transform, opacity;
 }
 
@@ -1738,13 +1739,14 @@ main::before {
   0% {
     opacity: 0;
     transform: translate3d(-50%, -50%, 0) scale(0.35) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.16, 0.76, 0.24, 1);
   }
 
-  12% {
+  16% {
     opacity: 1;
   }
 
-  62% {
+  68% {
     opacity: 1;
     transform: translate3d(
         calc(-50% + var(--confetti-dx)),
@@ -1752,6 +1754,7 @@ main::before {
         0
       )
       scale(1) rotate(var(--confetti-rotation));
+    animation-timing-function: cubic-bezier(0.3, 0, 0.24, 1);
   }
 
   100% {

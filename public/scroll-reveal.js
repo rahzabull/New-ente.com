@@ -1118,6 +1118,8 @@ const initToysCarousel = () => {
   const viewport = carousel.querySelector(".toys-viewport");
   const track = carousel.querySelector(".toys-track");
   const originals = [...carousel.querySelectorAll(".toy-card")];
+  const confettiHost = carousel.closest(".toys") || carousel;
+  const toysHeading = confettiHost.querySelector("#toys-title");
   const previous = carousel.querySelector("[data-toys-prev]");
   const next = carousel.querySelector("[data-toys-next]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -1137,7 +1139,7 @@ const initToysCarousel = () => {
 
   confettiLayer.className = "toy-confetti-layer";
   confettiLayer.setAttribute("aria-hidden", "true");
-  carousel.append(confettiLayer);
+  confettiHost.append(confettiLayer);
 
   const burstConfetti = (card) => {
     if (reducedMotion.matches) {
@@ -1153,26 +1155,26 @@ const initToysCarousel = () => {
 
     confettiCooldowns.set(card, now);
     const cardBounds = card.getBoundingClientRect();
-    const carouselBounds = carousel.getBoundingClientRect();
-    const originX = cardBounds.left - carouselBounds.left + cardBounds.width / 2;
-    const originY = cardBounds.top - carouselBounds.top + cardBounds.height * 0.48;
-    const count = 22;
+    const hostBounds = confettiHost.getBoundingClientRect();
+    const originX = cardBounds.left - hostBounds.left + cardBounds.width / 2;
+    const originY = cardBounds.top - hostBounds.top + cardBounds.height * 0.52;
+    const count = 18;
 
     for (let index = 0; index < count; index += 1) {
       const particle = document.createElement("span");
       const angle = (Math.PI * 2 * index) / count + (Math.random() - 0.5) * 0.42;
-      const force = 58 + Math.random() * 76;
+      const force = 52 + Math.random() * 68;
       const dx = Math.cos(angle) * force;
-      const dy = Math.sin(angle) * force - 24;
-      const duration = 680 + Math.random() * 260;
-      const delay = Math.random() * 55;
+      const dy = Math.sin(angle) * force - 28;
+      const duration = 980 + Math.random() * 280;
+      const delay = Math.random() * 75;
 
       particle.className = "toy-confetti";
       particle.style.setProperty("--confetti-origin-x", `${originX.toFixed(2)}px`);
       particle.style.setProperty("--confetti-origin-y", `${originY.toFixed(2)}px`);
       particle.style.setProperty("--confetti-dx", `${dx.toFixed(2)}px`);
       particle.style.setProperty("--confetti-rise-y", `${dy.toFixed(2)}px`);
-      particle.style.setProperty("--confetti-fall-y", `${(dy + 62 + Math.random() * 34).toFixed(2)}px`);
+      particle.style.setProperty("--confetti-fall-y", `${(dy + 74 + Math.random() * 38).toFixed(2)}px`);
       const rotation = Math.round((Math.random() - 0.5) * 720);
       particle.style.setProperty("--confetti-rotation", `${rotation}deg`);
       particle.style.setProperty("--confetti-final-rotation", `${Math.round(rotation * 1.45)}deg`);
@@ -1205,15 +1207,9 @@ const initToysCarousel = () => {
   track.append(after);
   cards = [...track.querySelectorAll(".toy-card")];
 
-  track.addEventListener("pointerover", (event) => {
-    const card = event.target.closest(".toy-card");
-
-    if (!card || !track.contains(card) || card.contains(event.relatedTarget)) {
-      return;
-    }
-
-    burstConfetti(card);
-  });
+  if (toysHeading && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    toysHeading.addEventListener("pointerenter", () => burstConfetti(toysHeading));
+  }
 
   const wrapOffset = () => {
     if (!setWidth) {
