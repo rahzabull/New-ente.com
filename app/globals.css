@@ -1890,7 +1890,7 @@ main::before {
 
 .testimonials {
   width: var(--viewport-inline-size);
-  margin-top: 0;
+  margin-top: var(--section-gap);
   margin-left: calc((100% - var(--viewport-inline-size)) / 2);
   margin-right: calc((100% - var(--viewport-inline-size)) / 2);
   padding: 92px 70px 86px;
