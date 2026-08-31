@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <div dangerouslySetInnerHTML={{ __html: bodyMarkup }} />
-      <script src="/scroll-reveal.js?v=26" defer />
+      <script src="/scroll-reveal.js?v=27" defer />
     </>
   );
 }

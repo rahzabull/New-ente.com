@@ -9,9 +9,6 @@ syncViewportInlineSize();
 window.addEventListener("resize", syncViewportInlineSize, { passive: true });
 
 const revealGroups = [
-  { selector: ".hero-copy", step: 0, variant: "reveal-slide-left" },
-  { selector: ".hero-visual", step: 120, variant: "reveal-zoom" },
-  { selector: ".hero-side", step: 220, variant: "reveal-slide-right" },
   { selector: ".logo-strip", step: 0, variant: "reveal-zoom" },
   { selector: ".products > .card-photos", step: 0, variant: "reveal-zoom" },
   { selector: ".product-row > .card", step: 140, variant: "reveal-zoom" },
@@ -340,7 +337,7 @@ const initPrivacyStory = () => {
   const section = document.querySelector(".privacy-story");
   const sticky = section?.querySelector(".privacy-story-sticky");
   const eyebrow = section?.querySelector(".privacy-story-eyebrow");
-  const headline = section?.querySelector(".privacy-story-copy h2");
+  const headline = section?.querySelector(".privacy-story-copy h1");
   const response = section?.querySelector(".privacy-story-copy p");
   const hint = section?.querySelector(".privacy-story-hint");
   const objects = Array.from(section?.querySelectorAll(".feature-object") || []);
@@ -899,9 +896,6 @@ const initPrivacyStory = () => {
 };
 
 const parallaxGroups = [
-  { selector: ".hero-copy", speed: -0.045, max: 30 },
-  { selector: ".hero-illustration", speed: 0.075, max: 48 },
-  { selector: ".hero-side", speed: -0.03, max: 22 },
   { selector: ".product-card-logo", speed: -0.02, max: 14 },
   { selector: ".product-card-copy", speed: -0.035, max: 20 },
   { selector: ".testimonials > h2", speed: -0.035, max: 24 },
