@@ -906,9 +906,14 @@ main::before {
 .privacy-story {
   --story-ink: #050505;
   position: relative;
-  height: 323svh;
+  height: 100svh;
   margin-top: 0;
   color: var(--story-ink);
+}
+
+.privacy-story.privacy-story-first {
+  /* The sticky topbar stays in flow, so reclaim its first-viewport offset. */
+  margin-top: -80px;
 }
 
 .privacy-story-sticky {
@@ -919,6 +924,10 @@ main::before {
   overflow: clip;
   background: #ffffff;
   isolation: isolate;
+}
+
+.privacy-story.privacy-story-first .privacy-story-sticky {
+  position: relative;
 }
 
 .privacy-story-sticky::before {
@@ -970,7 +979,18 @@ main::before {
 .privacy-story-copy h1 > span {
   display: block;
   white-space: nowrap;
-  will-change: clip-path;
+}
+
+.privacy-type-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.privacy-type-char {
+  display: inline-block;
+  white-space: pre;
+  transform-origin: center bottom;
+  will-change: opacity, transform, filter;
 }
 
 .privacy-story-copy p {
@@ -1458,8 +1478,12 @@ main::before {
 
 @media (max-width: 820px) {
   .privacy-story {
-    height: 297svh;
+    height: 100svh;
     margin-top: 0;
+  }
+
+  .privacy-story.privacy-story-first {
+    margin-top: -68px;
   }
 
   .privacy-story-sticky {
@@ -1489,13 +1513,15 @@ main::before {
   }
 
   .feature-bubble {
-    min-width: 148px;
+    width: clamp(140px, 43vw, 178px);
+    min-width: 0;
     min-height: 70px;
     gap: 9px;
-    padding: 13px 16px;
+    padding: 12px 14px;
     border-width: 2px;
     box-shadow: 0 6px 0 #101010;
     font-size: 1rem;
+    line-height: 1.05;
   }
 
   .feature-bubble-mark {
@@ -1567,6 +1593,10 @@ main::before {
 @media (prefers-reduced-motion: reduce) {
   .privacy-story {
     height: auto;
+    margin-top: 0;
+  }
+
+  .privacy-story.privacy-story-first {
     margin-top: 0;
   }
 

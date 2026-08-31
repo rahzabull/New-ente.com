@@ -348,6 +348,50 @@ const initPrivacyStory = () => {
   }
 
   const headlineLines = Array.from(headline.children);
+  const typedCharacters = headlineLines.map((line) => {
+    const text = Array.from(line.childNodes)
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent || "")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const emoji = line.querySelector(".devil-emoji");
+    const fragment = document.createDocumentFragment();
+    const characters = [];
+
+    text.split(/(\s+)/).filter(Boolean).forEach((token) => {
+      if (/^\s+$/.test(token)) {
+        const space = document.createElement("span");
+        space.className = "privacy-type-char";
+        space.textContent = " ";
+        characters.push(space);
+        fragment.append(space);
+        return;
+      }
+
+      const word = document.createElement("span");
+      word.className = "privacy-type-word";
+      Array.from(token).forEach((character) => {
+        const characterNode = document.createElement("span");
+        characterNode.className = "privacy-type-char";
+        characterNode.textContent = character;
+        characters.push(characterNode);
+        word.append(characterNode);
+      });
+      fragment.append(word);
+    });
+
+    if (emoji) {
+      const emojiNode = document.createElement("span");
+      emojiNode.className = "privacy-type-char privacy-type-emoji";
+      emojiNode.append(emoji);
+      characters.push(emojiNode);
+      fragment.append(emojiNode);
+    }
+
+    line.replaceChildren(fragment);
+    return characters;
+  });
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const hoverCapable = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -386,6 +430,18 @@ const initPrivacyStory = () => {
     [0.53, 0.57],
     [0.88, 0.55]
   ];
+  const mobileStonePositions = [
+    [0.07, 0.82],
+    [0.18, 0.88],
+    [0.29, 0.83],
+    [0.4, 0.9],
+    [0.5, 0.84],
+    [0.6, 0.91],
+    [0.71, 0.82],
+    [0.82, 0.89],
+    [0.93, 0.83],
+    [0.94, 0.93]
+  ];
   const stoneStates = stones.map(() => ({
     x: 0,
     y: 0,
@@ -405,6 +461,7 @@ const initPrivacyStory = () => {
   let frame = 0;
   let lastTime = 0;
   let isNearViewport = false;
+  const introStartedAt = performance.now();
 
   const clearHoverClose = () => {
     if (hoverCloseTimer) {
@@ -556,18 +613,6 @@ const initPrivacyStory = () => {
     return;
   }
 
-  const getScrollProgress = () => {
-    const bounds = section.getBoundingClientRect();
-    const distance = Math.max(section.offsetHeight - window.innerHeight, 1);
-    return clamp(-bounds.top / distance, 0, 1);
-  };
-
-  const getIntroProgress = () => {
-    const bounds = section.getBoundingClientRect();
-    const viewportHeight = Math.max(window.innerHeight, 1);
-    return clamp((viewportHeight * 0.8 - bounds.top) / (viewportHeight * 0.58), 0, 1);
-  };
-
   const resolveCollisions = (targets, activeIndex, width, height) => {
     const movable = targets.filter((_, index) => index !== activeIndex);
 
@@ -609,10 +654,10 @@ const initPrivacyStory = () => {
   const getBubbleTargets = (width, height, time, entries, isMobile, verticalOffset) => {
     const basePositions = isMobile
       ? [
-          [0.31, 0.5],
-          [0.69, 0.5],
-          [0.31, 0.67],
-          [0.69, 0.67]
+          [0.26, 0.52],
+          [0.74, 0.52],
+          [0.26, 0.68],
+          [0.74, 0.68]
         ]
       : [
           [0.32, 0.52],
@@ -621,10 +666,10 @@ const initPrivacyStory = () => {
           [0.47, 0.69]
         ];
     const targets = basePositions.map(([x, y], index) => ({
-      x: width * x + directions[index].x * (1 - entries[index]) * (isMobile ? 0.55 : 1),
+      x: width * x + directions[index].x * (1 - entries[index]) * (isMobile ? 0.28 : 1),
       y:
         height * y +
-        directions[index].y * (1 - entries[index]) * (isMobile ? 0.55 : 1) +
+        directions[index].y * (1 - entries[index]) * (isMobile ? 0.28 : 1) +
         verticalOffset,
       scale: 0.62 + entries[index] * 0.38,
       rotation:
@@ -636,13 +681,13 @@ const initPrivacyStory = () => {
 
     if (activeIndex >= 0) {
       if (isMobile) {
-        const openSlots = [0.24, 0.5, 0.76];
+        const openSlots = [0.2, 0.5, 0.8];
         let slotIndex = 0;
 
         targets.forEach((target, index) => {
           if (index === activeIndex) {
             target.x = width * 0.5;
-            target.y = height * 0.67 + verticalOffset;
+            target.y = height * 0.68 + verticalOffset;
             target.scale = 1;
             target.rotation = 0;
             target.opacity = 1;
@@ -650,8 +695,8 @@ const initPrivacyStory = () => {
           }
 
           target.x = width * openSlots[slotIndex];
-          target.y = height * 0.39 + verticalOffset;
-          target.scale = 0.62;
+          target.y = height * 0.42 + verticalOffset;
+          target.scale = 0.52;
           target.rotation = restingRotations[index] * 1.35;
           target.opacity *= 0.38;
           slotIndex += 1;
@@ -713,10 +758,10 @@ const initPrivacyStory = () => {
     frame = 0;
     const delta = lastTime ? clamp((time - lastTime) / 16.667, 0.5, 2.2) : 1;
     lastTime = time;
-    // The section releases shortly after the final bubble settles, while this
-    // scale preserves the established physical timing of the internal stages.
-    storyProgress = clamp(getScrollProgress() / 1.16, 0, 1);
-    const introProgress = getIntroProgress();
+    // The complete first-fold story now plays on opening rather than being
+    // scrubbed by scroll. Leave a beat after typing before the layout moves.
+    storyProgress = clamp((time - introStartedAt - 1550) / 5000, 0, 1);
+    const introProgress = clamp((time - introStartedAt - 180) / 1500, 0, 1);
     const isMobile = window.innerWidth <= 820;
     const width = sticky.clientWidth;
     const height = sticky.clientHeight;
@@ -729,27 +774,44 @@ const initPrivacyStory = () => {
     const initialHeadlineTop = 22;
     const finalHeadlineLeft = isMobile ? 6 : 7.5;
     const finalHeadlineTop = 12.5 + endStateDropPercent;
-    const finalHeadlineScale = isMobile ? 0.5 : 0.56;
+    const headlineFontSize = Number.parseFloat(getComputedStyle(headline).fontSize) || 1;
+    const responseFontSize =
+      Number.parseFloat(getComputedStyle(response).fontSize) || headlineFontSize;
+    const finalHeadlineScale = clamp(responseFontSize / headlineFontSize, 0.5, 0.85);
     const headlineLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
     const headlineTop = initialHeadlineTop + (finalHeadlineTop - initialHeadlineTop) * headlineMove;
     const headlineScale = 1 + (finalHeadlineScale - 1) * headlineMove;
-    const introScale = 0.97 + introReveal * 0.03;
-    const introOffset = (1 - introReveal) * 18;
+    const introOffset = 0;
 
     headline.style.left = `${headlineLeft}%`;
     headline.style.top = `${headlineTop}%`;
     headline.style.opacity = "1";
     headline.style.textAlign = "left";
     headline.style.transform = `translate3d(0, ${introOffset.toFixed(2)}px, 0) scale(${(
-      headlineScale * introScale
+      headlineScale
     ).toFixed(4)})`;
     headlineLines.forEach((line, index) => {
-      const lineReveal =
+      const lineProgress =
         index === 0
-          ? smoothstep(0, 0.44, introProgress)
-          : smoothstep(0.52, 1, introProgress);
-      line.style.opacity = lineReveal > 0.01 ? "1" : "0";
-      line.style.clipPath = `inset(0 ${((1 - lineReveal) * 100).toFixed(2)}% 0 0)`;
+          ? smoothstep(0, 0.46, introProgress)
+          : smoothstep(0.48, 1, introProgress);
+      const characters = typedCharacters[index] || [];
+      line.style.opacity = lineProgress > 0.001 ? "1" : "0";
+      line.style.clipPath = "none";
+
+      characters.forEach((character, characterIndex) => {
+        const characterStart = characterIndex / Math.max(characters.length, 1);
+        const characterReveal = smoothstep(
+          characterStart,
+          Math.min(characterStart + 0.045, 1),
+          lineProgress
+        );
+        character.style.opacity = characterReveal.toFixed(3);
+        character.style.transform = `translate3d(0, ${(
+          (1 - characterReveal) * 0.16
+        ).toFixed(3)}em, 0) scale(${(0.94 + characterReveal * 0.06).toFixed(3)})`;
+        character.style.filter = `blur(${((1 - characterReveal) * 2.2).toFixed(2)}px)`;
+      });
     });
     if (eyebrow) {
       const initialEyebrowTop = 14;
@@ -819,7 +881,8 @@ const initPrivacyStory = () => {
         0.69 + index * 0.012,
         storyProgress
       );
-      const [baseX, baseY] = stonePositions[index] || [0.5, 0.7];
+      const positions = isMobile ? mobileStonePositions : stonePositions;
+      const [baseX, baseY] = positions[index] || [0.5, 0.7];
       const phase = time * (0.00072 + index * 0.000045) + index * 1.31;
       let targetX = width * baseX + Math.sin(phase) * (isMobile ? 5 : 12);
       let targetY =
