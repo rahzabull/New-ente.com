@@ -39,6 +39,29 @@ body {
   overflow-x: clip;
 }
 
+/* The topbar is sticky at top:16px and 65px tall, so it covers the first 81px
+   of the viewport. Without this, every nav anchor drops its target underneath
+   the bar - and the photos card is worse than most, because its phone art
+   overflows well above the card, so that is what gets clipped. */
+:root {
+  --anchor-offset: 120px;
+}
+
+#why,
+#switch,
+#toys,
+#footer {
+  scroll-margin-top: var(--anchor-offset);
+}
+
+/* Products needs more than the rest. The photos card is the section box top,
+   but its phone art is absolutely positioned and so sits outside that box -
+   about 117px above it once the reveal clears the entrance transform. Without
+   the extra, the anchor lands the card correctly and hides the phone. */
+#products {
+  scroll-margin-top: calc(var(--anchor-offset) + 100px);
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -2072,6 +2095,17 @@ main::before {
   /* Track the reduced switch padding-top so the two gaps stay matched here. */
   .testimonials {
     margin-top: calc(var(--section-gap) + 54px);
+  }
+
+  /* Shorter topbar at this breakpoint - top:10px plus a 58px min-height. */
+  :root {
+    --anchor-offset: 96px;
+  }
+
+  /* The phone still overflows the card here, but by 52px rather than the
+     115px of the desktop layout, so it needs correspondingly less room. */
+  #products {
+    scroll-margin-top: calc(var(--anchor-offset) + 48px);
   }
 
   .hero h1 {
