@@ -333,629 +333,223 @@ const initSwitchGapStretch = () => {
   window.addEventListener("resize", requestUpdate, { passive: true });
 };
 
-const initPrivacyStory = () => {
-  const section = document.querySelector(".privacy-story");
-  const sticky = section?.querySelector(".privacy-story-sticky");
-  const eyebrow = section?.querySelector(".privacy-story-eyebrow");
-  const headline = section?.querySelector(".privacy-story-copy h1");
-  const response = section?.querySelector(".privacy-story-copy p");
-  const hint = section?.querySelector(".privacy-story-hint");
-  const objects = Array.from(section?.querySelectorAll(".feature-object") || []);
-  const stones = Array.from(section?.querySelectorAll(".privacy-stones span") || []);
+const QUACK_DUCKY_DELAY = 1780;
+const QUACK_BOTTOM_DELAY = 5550;
+const QUACK_BOOT_TIMEOUT = 4000;
 
-  if (!section || !sticky || !headline || !response || !objects.length) {
+const decodeRiveBuffer = (base64) => {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes.buffer;
+};
+
+const initQuackFold = () => {
+  const stage = document.querySelector("[data-quack-stage]");
+  const shell = stage?.parentElement;
+
+  if (!stage || !shell) {
     return;
   }
 
-  const headlineLines = Array.from(headline.children);
-  const typedCharacters = headlineLines.map((line) => {
-    const text = Array.from(line.childNodes)
-      .filter((node) => node.nodeType === Node.TEXT_NODE)
-      .map((node) => node.textContent || "")
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .trim();
-    const emoji = line.querySelector(".devil-emoji");
-    const fragment = document.createDocumentFragment();
-    const characters = [];
+  const fit = () => {
+    const bounds = shell.getBoundingClientRect();
+    const maxScale =
+      parseFloat(
+        getComputedStyle(stage).getPropertyValue("--quack-max-scale")
+      ) || 1.25;
 
-    text.split(/(\s+)/).filter(Boolean).forEach((token) => {
-      if (/^\s+$/.test(token)) {
-        const space = document.createElement("span");
-        space.className = "privacy-type-char";
-        space.textContent = " ";
-        characters.push(space);
-        fragment.append(space);
-        return;
-      }
-
-      const word = document.createElement("span");
-      word.className = "privacy-type-word";
-      Array.from(token).forEach((character) => {
-        const characterNode = document.createElement("span");
-        characterNode.className = "privacy-type-char";
-        characterNode.textContent = character;
-        characters.push(characterNode);
-        word.append(characterNode);
-      });
-      fragment.append(word);
-    });
-
-    if (emoji) {
-      const emojiNode = document.createElement("span");
-      emojiNode.className = "privacy-type-char privacy-type-emoji";
-      emojiNode.append(emoji);
-      characters.push(emojiNode);
-      fragment.append(emojiNode);
-    }
-
-    line.replaceChildren(fragment);
-    return characters;
-  });
-
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const hoverCapable = window.matchMedia("(hover: hover) and (pointer: fine)");
-  const smoothstep = (start, end, value) => {
-    const progress = clamp((value - start) / (end - start), 0, 1);
-    return progress * progress * (3 - 2 * progress);
-  };
-  const directions = [
-    { x: -150, y: 70, rotation: -12 },
-    { x: 120, y: -90, rotation: 10 },
-    { x: 160, y: 64, rotation: 13 },
-    { x: -120, y: 110, rotation: -10 }
-  ];
-  const restingRotations = [-2.8, 2.1, 3.2, -2.4];
-  const floatSpeeds = [0.00105, 0.00088, 0.00097, 0.00079];
-  const states = objects.map(() => ({
-    x: 0,
-    y: 0,
-    scale: 0.62,
-    rotation: 0,
-    vx: 0,
-    vy: 0,
-    vs: 0,
-    vr: 0,
-    initialized: false
-  }));
-  const stonePositions = [
-    [0.18, 0.5],
-    [0.43, 0.43],
-    [0.79, 0.46],
-    [0.84, 0.64],
-    [0.72, 0.77],
-    [0.56, 0.8],
-    [0.34, 0.76],
-    [0.2, 0.68],
-    [0.53, 0.57],
-    [0.88, 0.55]
-  ];
-  const mobileStonePositions = [
-    [0.07, 0.82],
-    [0.18, 0.88],
-    [0.29, 0.83],
-    [0.4, 0.9],
-    [0.5, 0.84],
-    [0.6, 0.91],
-    [0.71, 0.82],
-    [0.82, 0.89],
-    [0.93, 0.83],
-    [0.94, 0.93]
-  ];
-  const stoneStates = stones.map(() => ({
-    x: 0,
-    y: 0,
-    scale: 0.5,
-    rotation: 0,
-    vx: 0,
-    vy: 0,
-    vs: 0,
-    vr: 0,
-    initialized: false
-  }));
-  const pointer = { x: 0, y: 0, active: false };
-  let activeFeature = "";
-  let activeOpenedAt = 0;
-  let hoverCloseTimer = 0;
-  let storyProgress = 0;
-  let frame = 0;
-  let lastTime = 0;
-  let isNearViewport = false;
-  const introStartedAt = performance.now();
-
-  const clearHoverClose = () => {
-    if (hoverCloseTimer) {
-      window.clearTimeout(hoverCloseTimer);
-      hoverCloseTimer = 0;
-    }
-  };
-
-  const setActiveFeature = (feature = "") => {
-    clearHoverClose();
-    activeFeature = activeFeature === feature ? "" : feature;
-    activeOpenedAt = activeFeature ? performance.now() : 0;
-    section.dataset.active = activeFeature;
-
-    objects.forEach((object) => {
-      const isActive = object.dataset.feature === activeFeature;
-      object.classList.toggle("is-active", isActive);
-      object.querySelector(".feature-bubble")?.setAttribute("aria-expanded", String(isActive));
-      object.querySelector(".feature-card")?.setAttribute("aria-hidden", String(!isActive));
-    });
-
-    requestTick();
-  };
-
-  const scheduleHoverClose = (delay = 160) => {
-    clearHoverClose();
-    const featureAtSchedule = activeFeature;
-
-    if (!featureAtSchedule) {
+    if (!stage.offsetWidth || !stage.offsetHeight) {
       return;
     }
 
-    hoverCloseTimer = window.setTimeout(() => {
-      hoverCloseTimer = 0;
-      if (activeFeature === featureAtSchedule) {
-        setActiveFeature("");
-      }
-    }, delay);
+    const scale = Math.min(
+      bounds.width / stage.offsetWidth,
+      bounds.height / stage.offsetHeight,
+      maxScale
+    );
+
+    stage.style.transform = `scale(${scale})`;
   };
 
-  objects.forEach((object) => {
-    const feature = object.dataset.feature;
-    const bubble = object.querySelector(".feature-bubble");
-    const close = object.querySelector(".feature-card-close");
+  fit();
+  window.addEventListener("resize", fit, { passive: true });
 
-    object.addEventListener("pointerenter", () => {
-      clearHoverClose();
-      if (
-        hoverCapable.matches &&
-        (reduceMotion.matches || storyProgress > 0.62) &&
-        activeFeature !== feature
-      ) {
-        setActiveFeature(feature);
-      }
-    });
-
-    object.addEventListener("pointerleave", (event) => {
-      if (
-        hoverCapable.matches &&
-        activeFeature === feature &&
-        !object.contains(event.relatedTarget)
-      ) {
-        if (performance.now() - activeOpenedAt > 440) {
-          scheduleHoverClose(170);
-        }
-      }
-    });
-
-    bubble?.addEventListener("click", (event) => {
-      if (!hoverCapable.matches || event.detail === 0) {
-        setActiveFeature(feature);
-      }
-    });
-
-    object.addEventListener("focusin", () => {
-      if ((reduceMotion.matches || storyProgress > 0.62) && activeFeature !== feature) {
-        setActiveFeature(feature);
-      }
-    });
-
-    object.addEventListener("focusout", (event) => {
-      if (activeFeature === feature && !object.contains(event.relatedTarget)) {
-        setActiveFeature("");
-      }
-    });
-
-    close?.addEventListener("click", (event) => {
-      event.stopPropagation();
-      setActiveFeature("");
-      bubble?.focus({ preventScroll: true });
-    });
-  });
-
-  section.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && activeFeature) {
-      const activeObject = objects.find(({ dataset }) => dataset.feature === activeFeature);
-      setActiveFeature("");
-      activeObject?.querySelector(".feature-bubble")?.focus({ preventScroll: true });
-    }
-  });
-
-  sticky.addEventListener("pointermove", (event) => {
-    if (!hoverCapable.matches) {
-      return;
-    }
-
-    const bounds = sticky.getBoundingClientRect();
-    pointer.x = event.clientX - bounds.left;
-    pointer.y = event.clientY - bounds.top;
-    pointer.active = true;
-
-    if (activeFeature && performance.now() - activeOpenedAt > 440) {
-      const activeObject = objects.find(({ dataset }) => dataset.feature === activeFeature);
-      const activeSurfaces = [
-        activeObject?.querySelector(".feature-bubble"),
-        activeObject?.querySelector(".feature-card")
-      ].filter(Boolean);
-      const isInsideActiveSurface = activeSurfaces.some((surface) => {
-        const surfaceBounds = surface.getBoundingClientRect();
-        const margin = 14;
-        return (
-          event.clientX >= surfaceBounds.left - margin &&
-          event.clientX <= surfaceBounds.right + margin &&
-          event.clientY >= surfaceBounds.top - margin &&
-          event.clientY <= surfaceBounds.bottom + margin
-        );
-      });
-
-      if (isInsideActiveSurface) {
-        clearHoverClose();
-      } else {
-        scheduleHoverClose(190);
-      }
-    }
-
-    requestTick();
-  });
-
-  sticky.addEventListener("pointerleave", () => {
-    pointer.active = false;
-    if (hoverCapable.matches && activeFeature) {
-      scheduleHoverClose(130);
-    }
-    requestTick();
-  });
-
-  if (reduceMotion.matches) {
-    section.classList.add("is-reduced-motion");
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
 
-  const resolveCollisions = (targets, activeIndex, width, height) => {
-    const movable = targets.filter((_, index) => index !== activeIndex);
+  const cssAnimations = () => stage.getAnimations({ subtree: true });
 
-    for (let pass = 0; pass < 4; pass += 1) {
-      for (let first = 0; first < movable.length; first += 1) {
-        for (let second = first + 1; second < movable.length; second += 1) {
-          const a = movable[first];
-          const b = movable[second];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const overlapX = 205 - Math.abs(dx);
-          const overlapY = 104 - Math.abs(dy);
+  const holdCss = () => {
+    cssAnimations().forEach((animation) => {
+      animation.pause();
+      animation.currentTime = 0;
+    });
+  };
 
-          if (overlapX <= 0 || overlapY <= 0) {
-            continue;
-          }
+  const runCss = () => {
+    cssAnimations().forEach((animation) => {
+      animation.currentTime = 0;
+      animation.play();
+    });
+  };
 
-          if (overlapX < overlapY) {
-            const push = overlapX / 2 + 8;
-            const direction = Math.sign(dx) || 1;
-            a.x -= push * direction;
-            b.x += push * direction;
-          } else {
-            const push = overlapY / 2 + 6;
-            const direction = Math.sign(dy) || 1;
-            a.y -= push * direction;
-            b.y += push * direction;
-          }
+  let ducky = null;
+  let duckyName = "Timeline 1";
+  let bottom = null;
+  let bottomName = "Timeline 1";
+  let duckyTimer = 0;
+  let bottomTimer = 0;
+  let holdInterval = 0;
+  let watchdog = 0;
+  let started = false;
 
-          a.x = clamp(a.x, 128, width - 128);
-          b.x = clamp(b.x, 128, width - 128);
-          a.y = clamp(a.y, height * 0.37, height - 82);
-          b.y = clamp(b.y, height * 0.37, height - 82);
-        }
-      }
+  // The canvas carries its own 2x backing store via width/height, so the
+  // drawing surface is never resized at runtime — asking Rive to do that here
+  // zeroes the surface and faults the wasm heap.
+  const createRive = (canvas, source, onReady) => {
+    try {
+      const instance = new window.rive.Rive({
+        ...source,
+        canvas,
+        autoplay: false,
+        fit: window.rive.Fit.contain,
+        onLoad: () => {
+          onReady(instance.contents?.artboards?.[0]?.animations?.[0] || "Timeline 1");
+        },
+        onLoadError: () => onReady(null)
+      });
+
+      return instance;
+    } catch {
+      return null;
     }
   };
 
-  const getBubbleTargets = (width, height, time, entries, isMobile, verticalOffset) => {
-    const basePositions = isMobile
-      ? [
-          [0.26, 0.52],
-          [0.74, 0.52],
-          [0.26, 0.68],
-          [0.74, 0.68]
-        ]
-      : [
-          [0.32, 0.52],
-          [0.57, 0.46],
-          [0.68, 0.62],
-          [0.47, 0.69]
-        ];
-    const targets = basePositions.map(([x, y], index) => ({
-      x: width * x + directions[index].x * (1 - entries[index]) * (isMobile ? 0.28 : 1),
-      y:
-        height * y +
-        directions[index].y * (1 - entries[index]) * (isMobile ? 0.28 : 1) +
-        verticalOffset,
-      scale: 0.62 + entries[index] * 0.38,
-      rotation:
-        directions[index].rotation * (1 - entries[index]) +
-        restingRotations[index] * entries[index],
-      opacity: entries[index]
-    }));
-    const activeIndex = objects.findIndex(({ dataset }) => dataset.feature === activeFeature);
+  const initBottom = () => {
+    const canvas = stage.querySelector("[data-quack-bottom]");
 
-    if (activeIndex >= 0) {
-      if (isMobile) {
-        const openSlots = [0.2, 0.5, 0.8];
-        let slotIndex = 0;
+    if (!canvas || bottom || !window.rive || !window.__BOTTOM_RIV) {
+      return;
+    }
 
-        targets.forEach((target, index) => {
-          if (index === activeIndex) {
-            target.x = width * 0.5;
-            target.y = height * 0.68 + verticalOffset;
-            target.scale = 1;
-            target.rotation = 0;
-            target.opacity = 1;
-            return;
-          }
+    bottom = createRive(
+      canvas,
+      { buffer: decodeRiveBuffer(window.__BOTTOM_RIV) },
+      (name) => {
+        bottomName = name || bottomName;
+      }
+    );
+  };
 
-          target.x = width * openSlots[slotIndex];
-          target.y = height * 0.42 + verticalOffset;
-          target.scale = 0.52;
-          target.rotation = restingRotations[index] * 1.35;
-          target.opacity *= 0.38;
-          slotIndex += 1;
-        });
+  const startSequence = () => {
+    if (started) {
+      return;
+    }
+
+    started = true;
+    window.clearInterval(holdInterval);
+    window.clearTimeout(watchdog);
+    runCss();
+
+    const playSafely = (instance, name) => {
+      try {
+        instance.play(name);
+      } catch {
+        /* a wasm fault in Rive must not take the rest of the fold down */
+      }
+    };
+
+    if (ducky) {
+      ducky.stop();
+      duckyTimer = window.setTimeout(() => playSafely(ducky, duckyName), QUACK_DUCKY_DELAY);
+    }
+
+    initBottom();
+
+    if (bottom) {
+      bottom.stop();
+      bottomTimer = window.setTimeout(() => playSafely(bottom, bottomName), QUACK_BOTTOM_DELAY);
+    }
+  };
+
+  const initDucky = () => {
+    const canvas = stage.querySelector("[data-quack-ducky]");
+
+    if (!canvas || !window.rive || !window.__DUCKY_RIV) {
+      startSequence();
+      return;
+    }
+
+    ducky = createRive(
+      canvas,
+      { buffer: decodeRiveBuffer(window.__DUCKY_RIV) },
+      (name) => {
+        duckyName = name || duckyName;
+        startSequence();
+      }
+    );
+
+    if (!ducky) {
+      startSequence();
+    }
+  };
+
+  holdCss();
+
+  // The CSS timeline is held at frame zero until Rive is ready, so the duck and
+  // the type land together. If Rive never shows up, play the CSS half anyway.
+  holdInterval = window.setInterval(() => {
+    if (!started) {
+      holdCss();
+    }
+  }, 80);
+
+  let attempts = 0;
+
+  const boot = () => {
+    if (window.rive && window.__DUCKY_RIV) {
+      // window.rive exists as soon as the shim parses, but the wasm module it
+      // decodes files with lands later; building an instance before then fails.
+      const ready = window.rive.RuntimeLoader?.awaitInstance;
+
+      if (ready) {
+        window.rive.RuntimeLoader.awaitInstance().then(initDucky, startSequence);
       } else {
-        const cardWidth = Math.min(470, window.innerWidth * 0.4);
-        const cardHeight = 300;
-        const activeTarget = targets[activeIndex];
-        activeTarget.x = clamp(activeTarget.x, cardWidth / 2 + 34, width - cardWidth / 2 - 34);
-        activeTarget.y = clamp(activeTarget.y, height * 0.56, height - cardHeight / 2 - 40);
-        activeTarget.scale = 1;
-        activeTarget.rotation = 0;
-
-        targets.forEach((target, index) => {
-          if (index === activeIndex) {
-            return;
-          }
-
-          const dx = target.x - activeTarget.x;
-          const dy = target.y - activeTarget.y;
-          const overlapX = cardWidth / 2 + 145 - Math.abs(dx);
-          const overlapY = cardHeight / 2 + 82 - Math.abs(dy);
-
-          if (overlapX > 0 && overlapY > 0) {
-            if (overlapX < overlapY) {
-              target.x += (Math.sign(dx) || (index % 2 ? 1 : -1)) * (overlapX + 30);
-            } else {
-              target.y += (Math.sign(dy) || (index % 2 ? 1 : -1)) * (overlapY + 26);
-            }
-          }
-
-          target.x = clamp(target.x, 128, width - 128);
-          target.y = clamp(target.y, height * 0.37, height - 82);
-          target.scale = 0.86;
-          target.rotation = restingRotations[index] * 1.35;
-        });
-
-        resolveCollisions(targets, activeIndex, width, height);
+        initDucky();
       }
-    } else if (entries.every((entry) => entry > 0.985)) {
-      targets.forEach((target, index) => {
-        const phase = time * floatSpeeds[index] + index * 1.7;
-        target.x += Math.sin(phase) * (isMobile ? 4 : 7.5);
-        target.y += Math.cos(phase * 1.14) * (isMobile ? 6.5 : 10.5);
-        target.rotation += Math.sin(phase * 0.82) * (isMobile ? 0.4 : 0.85);
-      });
+
+      return;
     }
 
-    return targets;
+    attempts += 1;
+
+    if (attempts > 40) {
+      startSequence();
+      return;
+    }
+
+    window.setTimeout(boot, 60);
   };
 
-  const springValue = (state, valueKey, velocityKey, target, delta, stiffness, damping) => {
-    state[velocityKey] += (target - state[valueKey]) * stiffness * delta;
-    state[velocityKey] *= Math.pow(damping, delta);
-    state[valueKey] += state[velocityKey] * delta;
-  };
+  boot();
 
-  const render = (time = performance.now()) => {
-    frame = 0;
-    const delta = lastTime ? clamp((time - lastTime) / 16.667, 0.5, 2.2) : 1;
-    lastTime = time;
-    // The complete first-fold story now plays on opening rather than being
-    // scrubbed by scroll. Leave a beat after typing before the layout moves.
-    storyProgress = clamp((time - introStartedAt - 1550) / 5000, 0, 1);
-    const introProgress = clamp((time - introStartedAt - 180) / 1500, 0, 1);
-    const isMobile = window.innerWidth <= 820;
-    const width = sticky.clientWidth;
-    const height = sticky.clientHeight;
-    const introReveal = smoothstep(0, 1, introProgress);
-    const headlineMove = smoothstep(0.17, 0.43, storyProgress);
-    const responseReveal = smoothstep(0.29, 0.48, storyProgress);
-    const endStateDropPercent = isMobile ? 5.5 : 8;
-    const endStateDropPixels = height * (endStateDropPercent / 100);
-    const initialHeadlineLeft = isMobile ? 6 : 15;
-    const initialHeadlineTop = 22;
-    const finalHeadlineLeft = isMobile ? 6 : 7.5;
-    const finalHeadlineTop = 12.5 + endStateDropPercent;
-    const headlineFontSize = Number.parseFloat(getComputedStyle(headline).fontSize) || 1;
-    const responseFontSize =
-      Number.parseFloat(getComputedStyle(response).fontSize) || headlineFontSize;
-    const finalHeadlineScale = clamp(responseFontSize / headlineFontSize, 0.5, 0.85);
-    const headlineLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
-    const headlineTop = initialHeadlineTop + (finalHeadlineTop - initialHeadlineTop) * headlineMove;
-    const headlineScale = 1 + (finalHeadlineScale - 1) * headlineMove;
-    const introOffset = 0;
-
-    headline.style.left = `${headlineLeft}%`;
-    headline.style.top = `${headlineTop}%`;
-    headline.style.opacity = "1";
-    headline.style.textAlign = "left";
-    headline.style.transform = `translate3d(0, ${introOffset.toFixed(2)}px, 0) scale(${(
-      headlineScale
-    ).toFixed(4)})`;
-    headlineLines.forEach((line, index) => {
-      const lineProgress =
-        index === 0
-          ? smoothstep(0, 0.46, introProgress)
-          : smoothstep(0.48, 1, introProgress);
-      const characters = typedCharacters[index] || [];
-      line.style.opacity = lineProgress > 0.001 ? "1" : "0";
-      line.style.clipPath = "none";
-
-      characters.forEach((character, characterIndex) => {
-        const characterStart = characterIndex / Math.max(characters.length, 1);
-        const characterReveal = smoothstep(
-          characterStart,
-          Math.min(characterStart + 0.045, 1),
-          lineProgress
-        );
-        character.style.opacity = characterReveal.toFixed(3);
-        character.style.transform = `translate3d(0, ${(
-          (1 - characterReveal) * 0.16
-        ).toFixed(3)}em, 0) scale(${(0.94 + characterReveal * 0.06).toFixed(3)})`;
-        character.style.filter = `blur(${((1 - characterReveal) * 2.2).toFixed(2)}px)`;
-      });
-    });
-    if (eyebrow) {
-      const initialEyebrowTop = 14;
-      const finalEyebrowTop = 7.5 + endStateDropPercent;
-      const eyebrowLeft = initialHeadlineLeft + (finalHeadlineLeft - initialHeadlineLeft) * headlineMove;
-      const eyebrowTop = initialEyebrowTop + (finalEyebrowTop - initialEyebrowTop) * headlineMove;
-      eyebrow.style.left = `${eyebrowLeft}%`;
-      eyebrow.style.top = `${eyebrowTop}%`;
-      eyebrow.style.opacity = "1";
-      eyebrow.style.transform = `translate3d(0, ${(
-        introOffset * 0.55
-      ).toFixed(2)}px, 0) scale(${(
-        (1.28 - introReveal * 0.28) * (1 - headlineMove * 0.16)
-      ).toFixed(4)})`;
-      eyebrow.style.transformOrigin = "left top";
-    }
-    response.style.left = `${finalHeadlineLeft}%`;
-    response.style.top = `${(isMobile ? 32 : 29) + endStateDropPercent}%`;
-    response.style.opacity = responseReveal.toFixed(3);
-    response.style.transform = `translate3d(0, ${(1 - responseReveal) * 34}px, 0) rotate(${(1 - responseReveal) * 2}deg)`;
-
-    if (hint) {
-      hint.style.opacity = clamp(1 - storyProgress * 7, 0, 1).toFixed(3);
-    }
-
-    const entries = objects.map((_, index) =>
-      smoothstep(0.5 + index * 0.052, 0.7 + index * 0.052, storyProgress)
-    );
-
-    if (storyProgress < 0.48 && activeFeature) {
-      setActiveFeature("");
-    }
-
-    const targets = getBubbleTargets(
-      width,
-      height,
-      time,
-      entries,
-      isMobile,
-      endStateDropPixels
-    );
-
-    states.forEach((state, index) => {
-      const target = targets[index];
-
-      if (!state.initialized) {
-        state.x = target.x;
-        state.y = target.y;
-        state.scale = target.scale;
-        state.rotation = target.rotation;
-        state.initialized = true;
-      }
-
-      springValue(state, "x", "vx", target.x, delta, 0.06, 0.76);
-      springValue(state, "y", "vy", target.y, delta, 0.06, 0.76);
-      springValue(state, "scale", "vs", target.scale, delta, 0.075, 0.74);
-      springValue(state, "rotation", "vr", target.rotation, delta, 0.065, 0.74);
-
-      objects[index].style.opacity = target.opacity.toFixed(3);
-      objects[index].style.pointerEvents = target.opacity > 0.82 ? "auto" : "none";
-      objects[index].style.transform = `translate3d(${state.x.toFixed(2)}px, ${state.y.toFixed(2)}px, 0) rotate(${state.rotation.toFixed(3)}deg) scale(${state.scale.toFixed(4)})`;
-    });
-
-    stones.forEach((stone, index) => {
-      const reveal = smoothstep(
-        0.54 + index * 0.012,
-        0.69 + index * 0.012,
-        storyProgress
-      );
-      const positions = isMobile ? mobileStonePositions : stonePositions;
-      const [baseX, baseY] = positions[index] || [0.5, 0.7];
-      const phase = time * (0.00072 + index * 0.000045) + index * 1.31;
-      let targetX = width * baseX + Math.sin(phase) * (isMobile ? 5 : 12);
-      let targetY =
-        height * baseY +
-        endStateDropPixels +
-        Math.cos(phase * 1.17) * (isMobile ? 7 : 15);
-      let targetRotation = Math.sin(phase * 0.83) * (isMobile ? 3 : 6) + index * 7;
-
-      if (pointer.active && reveal > 0.8) {
-        const dx = targetX - pointer.x;
-        const dy = targetY - pointer.y;
-        const distance = Math.max(Math.hypot(dx, dy), 1);
-        const radius = isMobile ? 105 : 175;
-
-        if (distance < radius) {
-          const force = Math.pow(1 - distance / radius, 2);
-          const push = force * (isMobile ? 34 : 78);
-          targetX += (dx / distance) * push;
-          targetY += (dy / distance) * push;
-          targetRotation += (dx / distance) * force * 18;
-        }
-      }
-
-      targetX = clamp(targetX, 24, width - 24);
-      targetY = clamp(targetY, height * 0.39, height - 34);
-      const targetScale = 0.62 + reveal * (isMobile ? 0.2 : 0.38);
-      const state = stoneStates[index];
-
-      if (!state.initialized) {
-        state.x = targetX;
-        state.y = targetY;
-        state.scale = targetScale;
-        state.rotation = targetRotation;
-        state.initialized = true;
-      }
-
-      springValue(state, "x", "vx", targetX, delta, 0.072, 0.76);
-      springValue(state, "y", "vy", targetY, delta, 0.072, 0.76);
-      springValue(state, "scale", "vs", targetScale, delta, 0.1, 0.72);
-      springValue(state, "rotation", "vr", targetRotation, delta, 0.075, 0.75);
-
-      stone.style.opacity = (reveal * (activeFeature ? 0.48 : 0.92)).toFixed(3);
-      stone.style.transform = `translate3d(${state.x.toFixed(2)}px, ${state.y.toFixed(2)}px, 0) translate(-50%, -50%) rotate(${state.rotation.toFixed(3)}deg) scale(${state.scale.toFixed(4)})`;
-    });
-
-    section.dataset.stage = storyProgress < 0.28 ? "intro" : storyProgress < 0.52 ? "response" : "features";
-
-    if (isNearViewport && !frame) {
-      frame = window.requestAnimationFrame(render);
-    }
-  };
-
-  function requestTick() {
-    if (!frame) {
-      frame = window.requestAnimationFrame(render);
-    }
+  // Whatever happens to Rive, the type and the tag still have to play.
+  if (!started) {
+    watchdog = window.setTimeout(startSequence, QUACK_BOOT_TIMEOUT);
   }
 
-  const proximityObserver = new IntersectionObserver(
-    ([entry]) => {
-      isNearViewport = entry.isIntersecting;
-      if (isNearViewport) {
-        lastTime = 0;
-        requestTick();
-      }
-    },
-    { rootMargin: "80% 0px 80% 0px" }
-  );
-
-  proximityObserver.observe(section);
-  requestTick();
-  window.addEventListener("scroll", requestTick, { passive: true });
-  window.addEventListener("resize", requestTick, { passive: true });
+  window.addEventListener("pagehide", () => {
+    window.clearInterval(holdInterval);
+    window.clearTimeout(watchdog);
+    window.clearTimeout(duckyTimer);
+    window.clearTimeout(bottomTimer);
+  });
 };
 
 const parallaxGroups = [
@@ -1403,7 +997,7 @@ const initAnimations = () => {
   initTestimonialHover();
   initMobileTopbarFooterHandoff();
   initSwitchGapStretch();
-  initPrivacyStory();
+  initQuackFold();
   initParallax();
   initFooterElastic();
   initToysCarousel();
