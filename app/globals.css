@@ -11,6 +11,7 @@
   --yellow: #ffd106;
   --dark: #2e2e2e;
   --indigo: #5965f2;
+  --spray: #f92b1c;
   --radius-xl: 32px;
   --radius-lg: 24px;
   --radius-pill: 999px;
@@ -935,7 +936,220 @@ main::before {
   font-weight: 500;
 }
 
-/* First fold — "Most apps want to know you better / we don't" */
+/* ── First fold: "All the good stuff." ──────────────────────────────────────
+   Line one lands solid and black; line two fades back to grey and gets its
+   "nonsense." struck through in spray red, borrowing the graffiti language the
+   duck fold uses further down the page. */
+
+.hero-fold {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 0 clamp(24px, 6vw, 92px);
+  overflow: hidden;
+}
+
+.hero-aura {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  filter: blur(120px);
+  /* The fold clips its overflow, so the blurred blobs would otherwise stop
+     dead at the box. Fade the whole layer out well before every edge and
+     corner so the colour dissolves into the page instead of ending. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 82% 80% at 50% 44%,
+    #000 24%,
+    rgba(0, 0, 0, 0.5) 56%,
+    transparent 84%
+  );
+  mask-image: radial-gradient(
+    ellipse 82% 80% at 50% 44%,
+    #000 24%,
+    rgba(0, 0, 0, 0.5) 56%,
+    transparent 84%
+  );
+}
+
+.hero-aura i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+}
+
+.hero-aura i:nth-child(1) {
+  width: 44vw;
+  height: 44vw;
+  left: -18vw;
+  top: -22vw;
+  background: var(--green);
+  animation: hero-drift-a 19s ease-in-out infinite;
+}
+
+.hero-aura i:nth-child(2) {
+  width: 36vw;
+  height: 36vw;
+  right: -12vw;
+  top: -2vw;
+  background: var(--blue);
+  animation: hero-drift-b 24s ease-in-out infinite;
+}
+
+.hero-aura i:nth-child(3) {
+  width: 32vw;
+  height: 32vw;
+  right: 6vw;
+  bottom: -24vw;
+  background: var(--violet);
+  animation: hero-drift-c 29s ease-in-out infinite;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1180px);
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(3.3rem, 7.4vw, 6.9rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  color: var(--text);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.hero-line {
+  display: block;
+}
+
+.hero-line-muted {
+  color: var(--muted-soft);
+}
+
+.hero-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.52em) rotate(1.8deg);
+  animation: hero-word-rise 0.82s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-line:first-child .hero-word:nth-child(1) { animation-delay: 0.12s; }
+.hero-line:first-child .hero-word:nth-child(2) { animation-delay: 0.2s; }
+.hero-line:first-child .hero-word:nth-child(3) { animation-delay: 0.28s; }
+.hero-line:first-child .hero-word:nth-child(4) { animation-delay: 0.36s; }
+.hero-line-muted .hero-word:nth-child(1) { animation-delay: 0.54s; }
+.hero-line-muted .hero-word:nth-child(2) { animation-delay: 0.62s; }
+.hero-line-muted .hero-word:nth-child(3) { animation-delay: 0.7s; }
+.hero-line-muted .hero-word:nth-child(4) { animation-delay: 0.78s; }
+
+/* "nonsense." stays dark so the red stroke has something to bite into */
+.hero-word-struck {
+  position: relative;
+  color: var(--text);
+}
+
+.hero-strike {
+  position: absolute;
+  top: 56%;
+  right: -2.5%;
+  left: -1.5%;
+  height: 0.082em;
+  border-radius: 999px;
+  background: var(--spray, #f92b1c);
+  transform: rotate(-1.7deg);
+  transform-origin: 0 50%;
+  clip-path: inset(0 100% 0 0);
+  animation: hero-strike-on 0.52s cubic-bezier(0.4, 0.1, 0.5, 1) 1.5s forwards;
+}
+
+.hero-sub {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 26px;
+  margin: clamp(32px, 3.6vw, 52px) 0 0;
+  font-size: clamp(1.05rem, 1.5vw, 1.45rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: #4a4a4a;
+}
+
+.hero-claim {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: hero-claim-in 0.66s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-claim-no {
+  font-weight: 600;
+  color: var(--spray, #f92b1c);
+}
+
+.hero-sub .hero-claim:nth-child(1) { animation-delay: 1.12s; }
+.hero-sub .hero-claim:nth-child(2) { animation-delay: 1.24s; }
+.hero-sub .hero-claim:nth-child(3) { animation-delay: 1.36s; }
+.hero-sub .hero-claim:nth-child(4) { animation-delay: 1.62s; }
+.hero-sub .hero-claim:nth-child(5) { animation-delay: 1.74s; }
+.hero-sub .hero-claim:nth-child(6) { animation-delay: 1.86s; }
+
+@keyframes hero-word-rise {
+  from { opacity: 0; transform: translateY(0.52em) rotate(1.8deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes hero-strike-on {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 -2% 0 0); }
+}
+
+@keyframes hero-claim-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, 3vw) scale(1.08); }
+}
+
+@keyframes hero-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3vw, 4vw) scale(1.1); }
+}
+
+@keyframes hero-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4vw, -3vw) scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-word,
+  .hero-claim,
+  .hero-strike,
+  .hero-aura i {
+    animation: none;
+  }
+
+  .hero-word,
+  .hero-claim {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-strike {
+    clip-path: inset(0 -2% 0 0);
+  }
+}
+
+/* Duck fold — "Most apps want to know you better / we don't" */
 
 .quack-fold {
   position: relative;

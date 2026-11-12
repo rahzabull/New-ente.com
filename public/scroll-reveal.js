@@ -537,14 +537,26 @@ const initQuackFold = () => {
     window.setTimeout(boot, 60);
   };
 
-  boot();
+  // The fold sits below the products now, so the sequence must wait until it
+  // is actually on screen - otherwise the duck skates past an empty viewport.
+  const seen = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) {
+      return;
+    }
 
-  // Whatever happens to Rive, the type and the tag still have to play.
-  if (!started) {
-    watchdog = window.setTimeout(startSequence, QUACK_BOOT_TIMEOUT);
-  }
+    seen.disconnect();
+    boot();
+
+    // Whatever happens to Rive, the type and the tag still have to play.
+    if (!started) {
+      watchdog = window.setTimeout(startSequence, QUACK_BOOT_TIMEOUT);
+    }
+  }, { threshold: 0.2 });
+
+  seen.observe(stage);
 
   window.addEventListener("pagehide", () => {
+    seen.disconnect();
     window.clearInterval(holdInterval);
     window.clearTimeout(watchdog);
     window.clearTimeout(duckyTimer);
