@@ -24,8 +24,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Figtree:wght@900&family=Gochi+Hand&display=swap"
           rel="stylesheet"
         />
-        <script src="https://unpkg.com/@rive-app/webgl2@2.34.1/rive.js" defer />
-        <script src="/assets/ducky-data.js" defer />
       </head>
       <body>{children}</body>
     </html>

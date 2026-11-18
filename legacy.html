@@ -241,67 +241,6 @@
           </div>
         </section>
 
-        <section class="quack-fold" id="why" aria-labelledby="quack-fold-title">
-          <svg class="quack-defs" width="0" height="0" aria-hidden="true" focusable="false">
-            <defs>
-              <filter id="tagGoo" x="-25%" y="-30%" width="155%" height="210%" color-interpolation-filters="sRGB">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="1.15" result="b" />
-                <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 34 -13" result="shape" />
-                <feTurbulence type="fractalNoise" baseFrequency="0.62" numOctaves="4" seed="7" result="noise" />
-                <feDisplacementMap in="shape" in2="noise" scale="1.7" xChannelSelector="R" yChannelSelector="G" result="rough" />
-                <feMorphology in="shape" operator="dilate" radius="5" result="halo" />
-                <feComponentTransfer in="noise" result="dots">
-                  <feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 1" />
-                </feComponentTransfer>
-                <feComposite in="dots" in2="halo" operator="in" result="mist" />
-                <feFlood flood-color="#F92B1C" flood-opacity="0.62" result="ink" />
-                <feComposite in="ink" in2="mist" operator="in" result="spray" />
-                <feMerge>
-                  <feMergeNode in="spray" />
-                  <feMergeNode in="rough" />
-                </feMerge>
-              </filter>
-            </defs>
-          </svg>
-
-          <div class="quack-stage" data-quack-stage>
-            <div class="quack-mask">
-              <div class="quack-group">
-                <h1 class="quack-headline" id="quack-fold-title">
-                  <span>Most apps</span>
-                  <span>want to know</span>
-                  <span>you better</span>
-                </h1>
-
-                <p class="quack-tag">
-                  <span class="quack-tag-ink" aria-hidden="true">we dont<i class="quack-drip quack-drip-a"></i><i class="quack-drip quack-drip-b"></i></span>
-                  <span class="quack-tag-label">we don&rsquo;t.</span>
-                </p>
-
-                <canvas
-                  class="quack-art quack-art-ducky"
-                  data-quack-ducky
-                  width="1040"
-                  height="798"
-                  aria-hidden="true"
-                ></canvas>
-              </div>
-            </div>
-
-            <ul class="quack-pills" data-quack-pills aria-label="What Ente does instead">
-              <li class="quack-pill-slot quack-pill-slot-e2e">
-                <span class="quack-pill quack-pill-green" data-pill="e2e">End-to-end encrypted</span>
-              </li>
-              <li class="quack-pill-slot quack-pill-slot-open">
-                <span class="quack-pill quack-pill-orange" data-pill="open">Open source</span>
-              </li>
-              <li class="quack-pill-slot quack-pill-slot-ads">
-                <span class="quack-pill quack-pill-blue" data-pill="ads">No ads</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
         <section class="testimonials">
           <div class="noise"></div>
           <h2>
@@ -366,11 +305,6 @@
             <span>Breaking up with Big Tech is hard.</span>
             <span>We packed your bags. 🎒</span>
           </h2>
-          <p class="lede">
-            Background upload, duplicate handling, metadata preservation and
-            the satisfying feeling of moving thousands of photos somewhere less
-            nosy.
-          </p>
           <div class="card-actions">
             <a class="button button-dark" href="#footer">move your photos</a>
             <a class="button button-light" href="#products">See migration guide</a>
