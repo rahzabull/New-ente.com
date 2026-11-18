@@ -35,6 +35,9 @@
       <main>
         <section class="hero-fold" id="hero" aria-labelledby="hero-title">
           <div class="hero-aura" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="hero-tint" aria-hidden="true">
+            <i class="hero-tint-photos"></i><i class="hero-tint-auth"></i><i class="hero-tint-locker"></i>
+          </div>
 
           <div class="hero-inner">
             <h1 class="hero-title" id="hero-title">
@@ -54,15 +57,63 @@
               </span>
             </h1>
 
+            <ul class="hero-cards" aria-label="Ente apps">
+              <li class="hero-claim hero-card-slot">
+                <a class="hero-card hero-card-auth" href="#auth" aria-label="Ente Auth - learn more">
+                  <span class="hero-card-icon"><img src="/assets/hero-icon-auth.png" alt="" width="280" height="259" decoding="async" /></span>
+                  <span class="hero-card-text">
+                    <span class="hero-card-name">Auth</span>
+                    <span class="hero-card-more">Learn more</span>
+                  </span>
+                </a>
+              </li>
+              <li class="hero-claim hero-card-slot">
+                <a class="hero-card hero-card-photos" href="#photos" aria-label="Ente Photos - learn more">
+                  <span class="hero-card-icon"><img src="/assets/hero-icon-photos.png" alt="" width="280" height="259" decoding="async" /></span>
+                  <span class="hero-card-text">
+                    <span class="hero-card-name">Photos</span>
+                    <span class="hero-card-more">Learn more</span>
+                  </span>
+                </a>
+              </li>
+              <li class="hero-claim hero-card-slot">
+                <a class="hero-card hero-card-locker" href="#locker" aria-label="Ente Locker - learn more">
+                  <span class="hero-card-icon"><img src="/assets/hero-icon-locker.png" alt="" width="280" height="259" decoding="async" /></span>
+                  <span class="hero-card-text">
+                    <span class="hero-card-name">Locker</span>
+                    <span class="hero-card-more">Learn more</span>
+                  </span>
+                </a>
+              </li>
+            </ul>
+
+            <!-- Claims removed to match the Nov 18 hero design. To restore, put this back in place of (or under) .hero-cards:
             <p class="hero-sub">
-              <span class="hero-claim">Smart photo management.</span>
-              <span class="hero-claim">Reliable authentication.</span>
-              <span class="hero-claim">Encrypted storage.</span>
-              <span class="hero-claim hero-claim-no">No tracking.</span>
-              <span class="hero-claim hero-claim-no">No ads.</span>
-              <span class="hero-claim hero-claim-no">No snooping.</span>
+              <span class="hero-sub-row">
+                <span class="hero-claim">Smart photo management.</span>
+                <span class="hero-claim">Reliable authentication.</span>
+                <span class="hero-claim">Encrypted storage.</span>
+              </span>
+              <span class="hero-sub-row hero-sub-row-no">
+                <span class="hero-claim hero-claim-no">No tracking.</span>
+                <span class="hero-claim hero-claim-no">No ads.</span>
+                <span class="hero-claim hero-claim-no">No snooping.</span>
+              </span>
             </p>
+            -->
           </div>
+
+          <div class="hero-duckies" data-hero-duckies>
+            <img
+              src="/assets/hero-duckies.png"
+              alt="Ducky and friends riding a scooter, holding signs: No training, No snooping, No ads."
+              width="1229"
+              height="350"
+              decoding="async"
+            />
+          </div>
+
+          <a class="hero-chevron" href="#products" aria-label="Scroll to products"><img src="/assets/hero-chevron.svg" alt="" width="30" height="19" /></a>
         </section>
 
 
@@ -83,7 +134,7 @@
         </section>
 
         <section class="products" id="products">
-          <article class="card card-photos">
+          <article class="card card-photos" id="photos">
             <span class="product-card-bg" aria-hidden="true">
               <span class="product-card-bg-art"></span>
             </span>
@@ -120,7 +171,7 @@
           </article>
 
           <div class="product-row">
-            <article class="card card-locker">
+            <article class="card card-locker" id="locker">
               <span class="product-card-bg" aria-hidden="true">
                 <span class="product-card-bg-art"></span>
               </span>
@@ -154,7 +205,7 @@
               </div>
             </article>
 
-            <article class="card card-auth">
+            <article class="card card-auth" id="auth">
               <span class="product-card-bg" aria-hidden="true">
                 <span class="product-card-bg-art"></span>
               </span>
@@ -237,13 +288,17 @@
               </div>
             </div>
 
-            <canvas
-              class="quack-art quack-art-bottom"
-              data-quack-bottom
-              width="1290"
-              height="1017"
-              aria-hidden="true"
-            ></canvas>
+            <ul class="quack-pills" data-quack-pills aria-label="What Ente does instead">
+              <li class="quack-pill-slot quack-pill-slot-e2e">
+                <span class="quack-pill quack-pill-green" data-pill="e2e">End-to-end encrypted</span>
+              </li>
+              <li class="quack-pill-slot quack-pill-slot-open">
+                <span class="quack-pill quack-pill-orange" data-pill="open">Open source</span>
+              </li>
+              <li class="quack-pill-slot quack-pill-slot-ads">
+                <span class="quack-pill quack-pill-blue" data-pill="ads">No ads</span>
+              </li>
+            </ul>
           </div>
         </section>
 

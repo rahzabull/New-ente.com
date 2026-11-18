@@ -951,7 +951,9 @@ main::before {
   overflow: hidden;
 }
 
+/* Plain white background: the glow blobs are switched off. */
 .hero-aura {
+  display: none;
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -1012,13 +1014,16 @@ main::before {
   position: relative;
   z-index: 1;
   width: min(100%, 1180px);
+  /* The headline block sits 10% of the viewport height above centre. */
+  top: -10vh;
+  top: -10svh;
 }
 
 .hero-title {
   margin: 0;
   font-size: clamp(3.3rem, 7.4vw, 6.9rem);
   font-weight: 700;
-  line-height: 0.95;
+  line-height: 1.14;
   letter-spacing: -0.055em;
   color: var(--text);
   text-align: center;
@@ -1057,7 +1062,9 @@ main::before {
 
 .hero-strike {
   position: absolute;
-  top: 56%;
+  /* 55% at line-height 1.14 puts the stroke on the same spot of the glyphs
+     as 56% did at 0.95. */
+  top: 55%;
   right: -2.5%;
   left: -1.5%;
   height: 0.082em;
@@ -1071,14 +1078,279 @@ main::before {
 
 .hero-sub {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px 26px;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
   margin: clamp(32px, 3.6vw, 52px) 0 0;
   font-size: clamp(1.05rem, 1.5vw, 1.45rem);
   font-weight: 500;
   letter-spacing: -0.015em;
   color: #4a4a4a;
+}
+
+/* Grey claims on one line; the three red "No ..." claims always sit together
+   on their own line underneath. */
+.hero-sub-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 26px;
+}
+
+.hero-sub-row-no {
+  flex-wrap: nowrap;
+  gap: 0 22px;
+}
+
+/* Product cards under the headline (Figma: "Hero fold - 1440", For My Ai
+   buddy). At rest: white rounded cards with the app icon and name, loosely
+   hand-placed. On hover/focus a card becomes its product: brand fill, white
+   halo, the icon grows and tips out of frame, "Learn more" appears, and a
+   tint of that brand rises from the bottom of the fold. */
+.hero-cards {
+  --hero-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --hero-pop: cubic-bezier(0.34, 1.4, 0.5, 1);
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+  margin: clamp(48px, 5vw, 70px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-card-slot:nth-child(1) { animation-delay: 2.1s; }
+.hero-card-slot:nth-child(2) { animation-delay: 2.22s; }
+.hero-card-slot:nth-child(3) { animation-delay: 2.34s; }
+
+.hero-card-auth { --brand: #9610d6; --tilt: -1.2deg; }
+.hero-card-photos { --brand: #1cc22c; --tilt: 0deg; }
+.hero-card-locker { --brand: #1668f2; --tilt: 2deg; }
+
+.hero-card {
+  position: relative;
+  display: block;
+  width: 242px;
+  height: 108px;
+  border-radius: 34px;
+  background-color: #fff;
+  box-shadow:
+    0 4px 50px -15px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px #e8e8e8;
+  color: #050505;
+  text-decoration: none;
+  transform: rotate(var(--tilt));
+  transition:
+    transform 0.5s var(--hero-ease),
+    background-color 0.4s ease,
+    box-shadow 0.5s var(--hero-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* clips the icon to the card, like the Figma mask */
+.hero-card-icon {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.hero-card-icon img {
+  position: absolute;
+  left: 14px;
+  top: 7px;
+  width: 102px;
+  height: auto;
+  transform-origin: 30% 40%;
+  transition:
+    width 0.55s var(--hero-pop),
+    left 0.55s var(--hero-pop),
+    top 0.55s var(--hero-pop),
+    transform 0.55s var(--hero-pop);
+}
+
+/* white halo drawn above the icon so the icon tucks under it */
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 0 #fff;
+  pointer-events: none;
+  transition: box-shadow 0.45s var(--hero-ease);
+}
+
+.hero-card-text {
+  position: absolute;
+  top: 50%;
+  left: 132px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(-50%);
+  transition: left 0.5s var(--hero-ease);
+}
+
+.hero-card-name {
+  font-family: "Figtree", "Outfit", sans-serif;
+  font-size: 22.14px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+  transition: color 0.35s ease;
+}
+
+.hero-card-more {
+  max-height: 0;
+  overflow: hidden;
+  color: #fff;
+  font-size: 10.8px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    max-height 0.45s var(--hero-ease),
+    opacity 0.35s ease,
+    transform 0.45s var(--hero-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-card:hover {
+    background-color: var(--brand);
+    transform: rotate(-2.2deg) scale(1.03);
+  }
+}
+
+.hero-card:focus-visible {
+  outline: none;
+  background-color: var(--brand);
+  transform: rotate(-2.2deg) scale(1.03);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-card:hover::after { box-shadow: inset 0 0 0 8px #fff; }
+  .hero-card:hover .hero-card-icon img {
+    left: -26px;
+    top: -26px;
+    width: 172px;
+    transform: rotate(11.4deg);
+  }
+  .hero-card:hover .hero-card-text { left: 152px; }
+  .hero-card:hover .hero-card-name { color: #fff; }
+  .hero-card:hover .hero-card-more {
+    max-height: 1.6em;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-card:focus-visible::after { box-shadow: inset 0 0 0 8px #fff; }
+.hero-card:focus-visible .hero-card-icon img {
+  left: -26px;
+  top: -26px;
+  width: 172px;
+  transform: rotate(11.4deg);
+}
+.hero-card:focus-visible .hero-card-text { left: 152px; }
+.hero-card:focus-visible .hero-card-name { color: #fff; }
+.hero-card:focus-visible .hero-card-more {
+  max-height: 1.6em;
+  opacity: 1;
+  transform: none;
+}
+
+/* Brand tint rising from the bottom of the fold - one layer per brand so a
+   move between cards crossfades. Peak ~0.17 like the Figma blur, fading to
+   white around the middle of the cards. */
+.hero-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-tint i {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(10%);
+  transition:
+    opacity 0.6s ease,
+    transform 0.8s var(--hero-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.hero-tint-photos {
+  background: linear-gradient(to top, rgba(28, 194, 44, 0.2), rgba(28, 194, 44, 0.07) 22%, rgba(28, 194, 44, 0) 42%);
+}
+
+.hero-tint-auth {
+  background: linear-gradient(to top, rgba(150, 16, 214, 0.17), rgba(150, 16, 214, 0.06) 22%, rgba(150, 16, 214, 0) 42%);
+}
+
+.hero-tint-locker {
+  background: linear-gradient(to top, rgba(22, 104, 242, 0.18), rgba(22, 104, 242, 0.06) 22%, rgba(22, 104, 242, 0) 42%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-fold:has(.hero-card-photos:hover) .hero-tint-photos,
+  .hero-fold:has(.hero-card-auth:hover) .hero-tint-auth,
+  .hero-fold:has(.hero-card-locker:hover) .hero-tint-locker {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-fold:has(.hero-card-photos:focus-visible) .hero-tint-photos,
+.hero-fold:has(.hero-card-auth:focus-visible) .hero-tint-auth,
+.hero-fold:has(.hero-card-locker:focus-visible) .hero-tint-locker {
+  opacity: 1;
+  transform: none;
+}
+
+/* Small white chevron at the bottom centre; light grey until a tint sits
+   behind it. */
+.hero-chevron {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  z-index: 1;
+  display: block;
+  padding: 8px;
+  transform: translateX(-50%);
+}
+
+.hero-chevron img {
+  display: block;
+  width: 30px;
+  height: auto;
+  filter: brightness(0.82);
+  transition: filter 0.5s ease;
+}
+
+.hero-fold:has(.hero-card:hover) .hero-chevron img,
+.hero-fold:has(.hero-card:focus-visible) .hero-chevron img {
+  filter: none;
+}
+
+@media (max-width: 820px) {
+  .hero-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card,
+  .hero-card::after,
+  .hero-card-icon img,
+  .hero-card-text,
+  .hero-card-name,
+  .hero-card-more,
+  .hero-tint i,
+  .hero-chevron img {
+    transition-duration: 0.01s;
+  }
 }
 
 .hero-claim {
@@ -1091,14 +1363,24 @@ main::before {
 .hero-claim-no {
   font-weight: 600;
   color: var(--spray, #f92b1c);
+  white-space: nowrap;
+  filter: blur(8px);
+  transform: translateY(12px);
+  animation: hero-claim-no-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.hero-sub .hero-claim:nth-child(1) { animation-delay: 1.12s; }
-.hero-sub .hero-claim:nth-child(2) { animation-delay: 1.24s; }
-.hero-sub .hero-claim:nth-child(3) { animation-delay: 1.36s; }
-.hero-sub .hero-claim:nth-child(4) { animation-delay: 1.62s; }
-.hero-sub .hero-claim:nth-child(5) { animation-delay: 1.74s; }
-.hero-sub .hero-claim:nth-child(6) { animation-delay: 1.86s; }
+.hero-sub-row .hero-claim:nth-child(1) { animation-delay: 1.12s; }
+.hero-sub-row .hero-claim:nth-child(2) { animation-delay: 1.24s; }
+.hero-sub-row .hero-claim:nth-child(3) { animation-delay: 1.36s; }
+/* After the grey claims have landed, one red claim every 0.2s. */
+.hero-sub-row-no .hero-claim:nth-child(1) { animation-delay: 1.9s; }
+.hero-sub-row-no .hero-claim:nth-child(2) { animation-delay: 2.1s; }
+.hero-sub-row-no .hero-claim:nth-child(3) { animation-delay: 2.3s; }
+
+@keyframes hero-claim-no-in {
+  from { opacity: 0; transform: translateY(12px); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
 
 @keyframes hero-word-rise {
   from { opacity: 0; transform: translateY(0.52em) rotate(1.8deg); }
@@ -1142,6 +1424,7 @@ main::before {
   .hero-claim {
     opacity: 1;
     transform: none;
+    filter: none;
   }
 
   .hero-strike {
@@ -1203,8 +1486,9 @@ main::before {
   left: -97px;
   width: 520px;
   height: 399px;
+  /* The headline and the tag stay where they are once the duck has skated
+     off - no lift. */
   transform: translateY(180px);
-  animation: quack-settle-up 1.15s cubic-bezier(0.34, 0.7, 0.24, 1) 5.05s forwards;
 }
 
 .quack-headline {
@@ -1309,38 +1593,104 @@ main::before {
   animation: quack-rive-in 0.5s cubic-bezier(0.3, 0.7, 0.3, 1) 1.78s forwards;
 }
 
-.quack-art-bottom {
+/* Claim pills - plain HTML/CSS, dropped in with physics by scroll-reveal.js.
+   Each slot is a zero-size anchor at the pill's settled centre; --tilt is the
+   pill's resting angle. Sizes are in --u so mobile can shrink the lot. */
+.quack-pills {
+  --u: 0.62px;
   position: absolute;
-  bottom: 43px;
-  left: -107.5px;
-  width: 645px;
-  height: 508.5px;
-  animation: quack-bottom-rise 1.05s cubic-bezier(0.16, 1, 0.3, 1) 5.55s forwards;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.quack-pill-slot {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.quack-pill {
+  --tilt: 0deg;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  translate: -50% -50%;
+  padding: calc(var(--u) * 20.87) calc(var(--u) * 44.53) calc(var(--u) * 22.26);
+  border: calc(var(--u) * 5.57) solid #111;
+  border-radius: 999px;
+  color: #fff;
+  font-size: calc(var(--u) * 40.35);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  box-shadow: 0 calc(var(--u) * 13.9) 0 #111;
+  transform: rotate(var(--tilt));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.quack-pill-blue { background: #4b8cff; }
+.quack-pill-orange { background: #ff6a1a; }
+.quack-pill-green { background: #14bb2e; }
+
+/* Stacking: "No ads" on top, "Open source" over "End-to-end encrypted". */
+.quack-pill-slot-e2e { z-index: 1; }
+.quack-pill-slot-open { z-index: 2; }
+.quack-pill-slot-ads { z-index: 3; }
+
+/* Below 900px the pills stack down the middle under the tag. */
+.quack-pill-slot-ads { left: 215px; top: 610px; }
+.quack-pill-slot-open { left: 215px; top: 676px; }
+.quack-pill-slot-e2e { left: 215px; top: 742px; }
+.quack-pill-slot-ads .quack-pill { --tilt: -6deg; }
+.quack-pill-slot-open .quack-pill { --tilt: 2.5deg; }
+.quack-pill-slot-e2e .quack-pill { --tilt: -1.5deg; }
+
+/* Held off-stage until scroll-reveal.js drops them. */
+.quack-pills[data-armed] .quack-pill {
+  visibility: hidden;
 }
 
 @media (min-width: 900px) {
+  /* Stage pixels equal viewport pixels at 1440x900 (900 tall), and the opening
+     animation is drawn 30% bigger than before. Wide enough for the pill pile. */
   .quack-stage {
     --quack-max-scale: 1.9;
-    width: 536px;
-    height: 778px;
+    width: 1000px;
+    height: 900px;
   }
 
-  /* The duck skates the full width of its artboard, but on the 430px stage the
-     leftmost 97px of that run sits off-frame, so it arrives mid-stride. The
-     stage is sized to 520 + 8px either side so the canvas edges land on the
-     frame edges: the duck rolls in and out at the boundary instead of being
-     cut off mid-frame or dissolving in open space. It cannot be moved
-     horizontally on its own - the spray at 3.58s is aligned to the tag. */
+  /* The duck skates the full width of its artboard; at 1.3x the canvas is
+     676px wide and sits inside the stage, so the duck rolls in and out at the
+     canvas edge (faded below) rather than being cut off by the frame. It cannot
+     be moved horizontally on its own - the spray at 3.58s is aligned to the
+     tag. Placed so the headline clears the top bar and the duck stays in view. */
   .quack-group {
-    top: 40px;
-    left: 8px;
+    /* + the 180px resting offset, which scales to 234px */
+    top: 61px;
+    left: 132px;
+    scale: 1.3;
+    transform-origin: 0 0;
   }
 
-  /* Recentres the bottom art in the narrower stage: its 508.5px render sits
-     68.25px inside this box, so -54.5 puts that render dead centre. */
-  .quack-art-bottom {
-    left: -54.5px;
+  /* Settled layout from the Figma end state (1440 wide): "No ads" tipped on
+     the left on top, the other two side by side, slightly overlapping. */
+  .quack-pills {
+    --u: 1px;
   }
+
+  .quack-pill-slot-ads { left: 270px; top: 623px; }
+  .quack-pill-slot-open { left: 326px; top: 725px; }
+  .quack-pill-slot-e2e { left: 708px; top: 724px; }
+  .quack-pill-slot-ads .quack-pill { --tilt: -8.7deg; }
+  .quack-pill-slot-open .quack-pill { --tilt: 0.3deg; }
+  .quack-pill-slot-e2e .quack-pill { --tilt: 0.1deg; }
 
   /* Nothing reaches the stage edge any more, so the stage-wide fade that hid
      the duck being cut off is redundant. */
@@ -1437,10 +1787,6 @@ main::before {
   .quack-drip,
   .quack-art {
     animation: none;
-  }
-
-  .quack-group {
-    transform: none;
   }
 
   .quack-headline span,
@@ -2550,4 +2896,491 @@ main::before {
   .switch h2 span:first-child {
     white-space: normal;
   }
+}
+
+/* Let the hero (and its brand tint) run edge to edge past the site-shell's
+   side padding, and keep the chevron on the first screen under the sticky
+   top bar (82px tall at desktop). */
+.hero-fold {
+  margin-inline: -20px;
+  padding-inline: calc(clamp(24px, 6vw, 92px) + 20px);
+}
+
+.hero-chevron {
+  bottom: 112px;
+}
+
+@media (max-width: 820px) {
+  .hero-fold {
+    margin-inline: -10px;
+    padding-inline: calc(clamp(24px, 6vw, 92px) + 10px);
+  }
+
+  .hero-chevron {
+    bottom: 96px;
+  }
+}
+
+/* The Photos icon art is squarer (250x253) than Auth/Locker (280x259), so at
+   the same width it ran taller and touched the card's bottom edge. Size it by
+   height instead so it gets the same 7px above and below as the others. */
+.hero-card-photos .hero-card-icon img {
+  width: 93px;
+  left: 18px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-card-photos:hover .hero-card-icon img {
+    width: 157px;
+  }
+}
+
+.hero-card-photos:focus-visible .hero-card-icon img {
+  width: 157px;
+}
+
+/* --- Nov 18 follow-up: hover shiver + full-bleed tint ---------------------
+   1. Shiver: the icon grew by animating width/left/top (layout, re-rasterised
+      every frame, wobbly at browser zoom) with an overshoot curve, and the
+      hover target was the card itself, which tilts and scales under the
+      cursor - near the edges the pointer fell off and back on. Now the hover
+      is read from the still list item, everything moves with transforms only,
+      on a smooth ease-out (no overshoot). */
+.hero-card-slot {
+  display: block;
+}
+
+.hero-card,
+.hero-card-icon img,
+.hero-card-text {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.hero-card {
+  transition:
+    transform 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    background-color 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card::after {
+  transition: box-shadow 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card-icon img,
+.hero-card-photos .hero-card-icon img {
+  left: 14px;
+  top: 7px;
+  width: 102px;
+  transform-origin: 0 0;
+  transform: none;
+  transition: transform 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Photos art is squarer: size by height so it keeps 7px above and below */
+.hero-card-photos .hero-card-icon img {
+  left: 18px;
+  width: 93px;
+}
+
+.hero-card-text {
+  left: 132px;
+  transition: transform 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card-name {
+  transition: color 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card-more {
+  transition:
+    max-height 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    transform 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-tint i {
+  transition: opacity 0.32s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.32s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* hover state: read from the slot, which never moves */
+@media (hover: hover) and (pointer: fine) {
+  .hero-card-slot:hover .hero-card {
+    background-color: var(--brand);
+    transform: rotate(-2.2deg) scale(1.03);
+  }
+  .hero-card-slot:hover .hero-card::after { box-shadow: inset 0 0 0 8px #fff; }
+  .hero-card-slot:hover .hero-card-icon img {
+    /* 102px -> 172px, moved up-left and tipped, same end pose as before */
+    transform: translate(-26.4px, -41.9px) rotate(11.4deg) scale(1.686);
+  }
+  .hero-card-slot:hover .hero-card-photos .hero-card-icon img {
+    transform: translate(-30.5px, -41px) rotate(11.4deg) scale(1.688);
+  }
+  .hero-card-slot:hover .hero-card-text { transform: translate(20px, -50%); }
+  .hero-card-slot:hover .hero-card-name { color: #fff; }
+  .hero-card-slot:hover .hero-card-more {
+    max-height: 1.6em;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* neutralise the older card-level hover rules */
+  .hero-card:hover .hero-card-icon img,
+  .hero-card-photos:hover .hero-card-icon img {
+    left: 14px;
+    top: 7px;
+    width: 102px;
+  }
+  .hero-card-photos:hover .hero-card-icon img {
+    left: 18px;
+    width: 93px;
+  }
+  .hero-card:hover .hero-card-text { left: 132px; }
+
+  .hero-fold:has(.hero-card-slot:hover .hero-card-photos) .hero-tint-photos,
+  .hero-fold:has(.hero-card-slot:hover .hero-card-auth) .hero-tint-auth,
+  .hero-fold:has(.hero-card-slot:hover .hero-card-locker) .hero-tint-locker {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-fold:has(.hero-card-slot:hover) .hero-chevron img {
+    filter: none;
+  }
+}
+
+.hero-card:focus-visible .hero-card-icon img,
+.hero-card-photos:focus-visible .hero-card-icon img {
+  left: 14px;
+  top: 7px;
+  width: 102px;
+  transform: translate(-26.4px, -41.9px) rotate(11.4deg) scale(1.686);
+}
+.hero-card-photos:focus-visible .hero-card-icon img {
+  left: 18px;
+  width: 93px;
+  transform: translate(-30.5px, -41px) rotate(11.4deg) scale(1.688);
+}
+.hero-card:focus-visible .hero-card-text {
+  left: 132px;
+  transform: translate(20px, -50%);
+}
+
+/* 2. Full-bleed light: the site shell stops at 1440px, so on wider screens
+      (or zoomed out) the tint was cut at both sides. Let the tint span the
+      whole viewport; the fold still clips vertically, and html/body clip
+      horizontal overflow so this can't cause sideways scroll. */
+.hero-fold {
+  overflow: visible clip;
+}
+
+.hero-tint {
+  left: 50%;
+  right: auto;
+  width: 100vw;
+  margin-left: -50vw;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card,
+  .hero-card::after,
+  .hero-card-icon img,
+  .hero-card-text,
+  .hero-card-name,
+  .hero-card-more,
+  .hero-tint i {
+    transition-duration: 0.01s;
+  }
+}
+
+/* Card entrance (after the strike on "nonsense."): a soft rise with a touch
+   of scale and blur, on a long gentle ease-out so it glides in rather than
+   pops. Delays are set by .hero-card-slot:nth-child above. */
+.hero-card-slot {
+  opacity: 0;
+  animation-name: hero-card-in;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+@keyframes hero-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.96);
+    filter: blur(6px);
+  }
+  60% {
+    filter: none;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card-slot {
+    opacity: 1;
+    animation: none;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* Colour leaking at the edge of the white halo: the brand colour used to fill
+   the whole card, with the 8px white ring painted over it, so the rounded
+   edge anti-aliased into a thin blue/green/purple fringe outside the ring.
+   Now the card itself stays white, the brand fill is a layer inset 8px inside
+   it, and on hover the icon is clipped to that same inner shape - nothing
+   coloured ever reaches the card's outer edge. */
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 26px;
+  background-color: var(--brand);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hero-card-icon {
+  overflow: visible;
+  border-radius: 0;
+  clip-path: inset(0 round 34px);
+  transition: clip-path 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-card:hover,
+  .hero-card-slot:hover .hero-card {
+    background-color: #fff;
+  }
+  .hero-card-slot:hover .hero-card::before { opacity: 1; }
+  .hero-card-slot:hover .hero-card-icon { clip-path: inset(8px round 26px); }
+  .hero-card:hover::after,
+  .hero-card-slot:hover .hero-card::after { box-shadow: none; }
+}
+
+.hero-card:focus-visible { background-color: #fff; }
+.hero-card:focus-visible::before { opacity: 1; }
+.hero-card:focus-visible .hero-card-icon { clip-path: inset(8px round 26px); }
+.hero-card:focus-visible::after { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card::before,
+  .hero-card-icon {
+    transition-duration: 0.01s;
+  }
+}
+
+/* Hero cards link to #photos / #auth / #locker. Give those anchors the same
+   clearance as the nav anchors so the card lands fully below the sticky top
+   bar; the photos card also needs the extra room for its phone art, which
+   overflows above the card box (see #products). */
+#photos {
+  scroll-margin-top: calc(var(--anchor-offset) + 100px);
+}
+
+#auth,
+#locker {
+  /* +24px: the reveal lifts these cards slightly after the jump lands */
+  scroll-margin-top: calc(var(--anchor-offset) + 24px);
+}
+
+/* Duckie pointers (Figma: "Ducki pointers", For My Ai buddy): the scooter
+   gang with the No training / No snooping / No ads signs. Hidden at first;
+   after the visitor's second scroll (scroll-reveal.js adds .is-duckies-in to
+   the fold) they roll in from the left, brake, and settle at the bottom of
+   the first fold. The chevron steps aside once they arrive. */
+.hero-duckies {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 1;
+  width: min(860px, 80vw);
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateX(calc(-50% - 100vw));
+}
+
+.hero-duckies img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 100%;
+}
+
+.hero-fold.is-duckies-in .hero-duckies {
+  visibility: visible;
+  animation: hero-duckies-roll 1.6s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+/* a little forward rock as the scooter brakes, then settle */
+.hero-fold.is-duckies-in .hero-duckies img {
+  animation: hero-duckies-brake 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) 1.05s both;
+}
+
+@keyframes hero-duckies-roll {
+  from { transform: translateX(calc(-50% - 100vw)); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes hero-duckies-brake {
+  0% { transform: rotate(0deg); }
+  35% { transform: rotate(1.6deg); }
+  70% { transform: rotate(-0.5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.hero-chevron {
+  transition: opacity 0.4s ease;
+}
+
+.hero-fold.is-duckies-in .hero-chevron {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* With the ducks in, the fold needs room under the cards on shorter screens */
+@media (max-height: 820px) and (min-width: 821px) {
+  .hero-duckies { width: min(700px, 70vw); }
+}
+
+@media (max-width: 820px) {
+  .hero-duckies {
+    width: 94vw;
+    bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fold.is-duckies-in .hero-duckies {
+    animation: hero-duckies-fade 0.4s ease both;
+  }
+  .hero-fold.is-duckies-in .hero-duckies img {
+    animation: none;
+  }
+}
+
+@keyframes hero-duckies-fade {
+  from { opacity: 0; transform: translateX(-50%); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
+
+/* Duckies follow-up: 30% bigger (860 -> 1118px), and no rock/bounce when the
+   scooter stops - it just glides in and settles. */
+.hero-duckies {
+  width: min(1118px, 92vw);
+  bottom: 6px;
+}
+
+.hero-fold.is-duckies-in .hero-duckies img {
+  animation: none;
+}
+
+@media (max-height: 820px) and (min-width: 821px) {
+  .hero-duckies { width: min(910px, 80vw); }
+}
+
+@media (max-width: 820px) {
+  .hero-duckies {
+    width: 94vw;
+    bottom: 8px;
+  }
+}
+
+/* Duckies, another +30% (1118 -> ~1453px; capped at 98vw so the signs never
+   run off-screen). That no longer fits under the cards in a 900px fold, so
+   the fold gets 110px of extra room at the bottom. The headline and cards
+   stay exactly where they were (the extra is padding, so the centring is
+   unchanged); the ducks arrive after two scrolls, by which point that
+   bottom strip is in view. */
+.hero-fold {
+  min-height: calc(100svh + 110px);
+  padding-bottom: 110px;
+}
+
+.hero-duckies {
+  width: min(1453px, 98vw);
+}
+
+@media (max-height: 820px) and (min-width: 821px) {
+  .hero-duckies { width: min(1183px, 92vw); }
+}
+
+@media (max-width: 820px) {
+  .hero-fold {
+    min-height: 100svh;
+    padding-bottom: 0;
+  }
+
+  .hero-duckies {
+    width: 94vw;
+  }
+}
+
+/* Duckies pulled up by 10% of the screen height: the extra room under the
+   fold shrinks from 110px to 20px (+ 10vh less), so the scooter sits higher.
+   The tallest bits (hat, "No snooping" sign) now reach the cards' row, so
+   the ducks sit behind the cards rather than over them. */
+.hero-fold {
+  min-height: calc(100svh + 110px - 10svh);
+  padding-bottom: calc(110px - 10svh);
+}
+
+.hero-duckies {
+  z-index: 0;
+}
+
+@media (max-width: 820px) {
+  .hero-fold {
+    min-height: 100svh;
+    padding-bottom: 0;
+  }
+}
+
+/* Duckies leave on the next scroll: they ride on, picking up speed, and off
+   the right edge. No bounce. (.is-duckies-out comes from scroll-reveal.js;
+   scrolling back up brings them in again.) */
+.hero-fold.is-duckies-out .hero-duckies {
+  visibility: visible;
+  animation: hero-duckies-leave 1.3s cubic-bezier(0.55, 0, 0.8, 0.45) both;
+}
+
+@keyframes hero-duckies-leave {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(calc(-50% + 100vw)); visibility: hidden; }
+}
+
+.hero-fold.is-duckies-out .hero-chevron {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fold.is-duckies-out .hero-duckies {
+    animation: hero-duckies-fade-out 0.4s ease both;
+  }
+}
+
+@keyframes hero-duckies-fade-out {
+  from { opacity: 1; transform: translateX(-50%); }
+  to { opacity: 0; transform: translateX(-50%); visibility: hidden; }
+}
+
+/* Duckies 10% smaller (every size above x 0.9). */
+.hero-duckies {
+  width: min(1308px, 88.2vw);
+}
+
+@media (max-height: 820px) and (min-width: 821px) {
+  .hero-duckies { width: min(1065px, 82.8vw); }
+}
+
+@media (max-width: 820px) {
+  .hero-duckies { width: 84.6vw; }
 }

@@ -334,7 +334,8 @@ const initSwitchGapStretch = () => {
 };
 
 const QUACK_DUCKY_DELAY = 1780;
-const QUACK_BOTTOM_DELAY = 5550;
+// pills drop once the duck has fully skated out of frame
+const QUACK_PILLS_DELAY = 6000;
 const QUACK_BOOT_TIMEOUT = 4000;
 
 const decodeRiveBuffer = (base64) => {
@@ -346,6 +347,299 @@ const decodeRiveBuffer = (base64) => {
   }
 
   return bytes.buffer;
+};
+
+// Claim pills drop in as one loose handful once the duck has fully left the
+// frame. A tiny hand-rolled sim: heavy gravity, one short hop, a squash spring
+// that settles slowly, and a spin that resolves into each pill's resting tilt.
+// Start heights, drift and spin vary a little on every load; the settled
+// layout itself comes from CSS (slot position + --tilt).
+const dropQuackPills = (pillsRoot) => {
+  const pills = Array.from(pillsRoot.querySelectorAll(".quack-pill"));
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const GRAVITY = 5600;
+  const HOP = 0.2;
+
+  const bodies = pills.map((element) => {
+    const id = element.dataset.pill;
+    const tilt = parseFloat(getComputedStyle(element).getPropertyValue("--tilt")) || 0;
+    const slot = element.parentElement;
+    // fall far enough to start above the top of the stage
+    const fall = slot.offsetTop + element.offsetHeight + rand(40, 140) + (id === "ads" ? 90 : 0);
+    const delay = id === "ads" ? rand(0.12, 0.18) : rand(0, 0.06);
+    const flightTime = Math.sqrt((2 * fall) / GRAVITY);
+    const spinRate = rand(110, 220) * (Math.random() < 0.5 ? -1 : 1);
+    const landingError = rand(4, 9) * (Math.random() < 0.5 ? -1 : 1);
+
+    return {
+      element,
+      id,
+      tilt,
+      delay,
+      y: -fall,
+      vy: 0,
+      x: rand(-36, 36),
+      vx: 0,
+      xStart: 0,
+      angle: tilt + landingError - spinRate * flightTime,
+      va: spinRate,
+      squash: 0,
+      vsquash: 0,
+      bounces: 0,
+      landed: false,
+      flightTime,
+      age: 0
+    };
+  });
+
+  bodies.forEach((body) => {
+    body.xStart = body.x;
+    body.vx = -body.x / body.flightTime;
+  });
+
+  const openSource = bodies.find((body) => body.id === "open");
+
+  const render = (body) => {
+    const sy = 1 - body.squash;
+    const sx = 1 + body.squash * 0.75;
+    body.element.style.transform =
+      `translate(${body.x.toFixed(2)}px, ${body.y.toFixed(2)}px) ` +
+      `rotate(${body.angle.toFixed(3)}deg) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
+  };
+
+  const impact = (body, speed) => {
+    body.vsquash += speed * 0.0042;
+
+    if (body.id === "ads" && openSource && openSource.landed) {
+      // "No ads" lands on "Open source" and knocks it
+      openSource.vsquash += speed * 0.0016;
+      openSource.va += -speed * 0.03;
+      openSource.vx += -speed * 0.02;
+    }
+  };
+
+  let last = performance.now();
+  let elapsed = 0;
+
+  bodies.forEach((body) => {
+    render(body);
+    body.element.style.visibility = "visible";
+  });
+  pillsRoot.removeAttribute("data-armed");
+
+  const step = (now) => {
+    const dt = Math.min((now - last) / 1000, 1 / 30);
+    last = now;
+    elapsed += dt;
+    let moving = false;
+
+    bodies.forEach((body) => {
+      if (elapsed < body.delay) {
+        moving = true;
+        return;
+      }
+
+      body.age += dt;
+
+      if (!body.landed || body.bounces < 2) {
+        body.vy += GRAVITY * dt;
+        body.y += body.vy * dt;
+
+        if (body.y >= 0 && body.vy > 0) {
+          const speed = body.vy;
+          body.y = 0;
+          body.bounces += 1;
+          body.landed = true;
+          impact(body, body.bounces === 1 ? speed : speed * 0.4);
+          body.vy = body.bounces === 1 ? -speed * HOP : 0;
+          if (body.bounces === 1) {
+            // the hop kills most of the spin
+            body.va *= 0.25;
+          }
+        }
+      }
+
+      if (body.landed) {
+        // springs back to rest: angle to tilt, x to 0 - stiff but heavily
+        // damped so it settles slowly rather than wobbling
+        body.va += (-(body.angle - body.tilt) * 130 - body.va * 12) * dt;
+        body.vx += (-body.x * 90 - body.vx * 14) * dt;
+      }
+
+      body.angle += body.va * dt;
+      body.x += body.vx * dt;
+
+      body.vsquash += (-body.squash * 420 - body.vsquash * 15) * dt;
+      body.squash = Math.max(-0.12, Math.min(0.32, body.squash + body.vsquash * dt));
+
+      render(body);
+
+      const settled =
+        body.bounces >= 2 &&
+        Math.abs(body.angle - body.tilt) < 0.05 &&
+        Math.abs(body.va) < 0.5 &&
+        Math.abs(body.x) < 0.1 &&
+        Math.abs(body.squash) < 0.002 &&
+        Math.abs(body.vsquash) < 0.02;
+
+      if (!settled) {
+        moving = true;
+      }
+    });
+
+    if (moving && elapsed < 6) {
+      window.requestAnimationFrame(step);
+      return;
+    }
+
+    bodies.forEach((body) => {
+      body.element.style.transform = "";
+    });
+  };
+
+  window.requestAnimationFrame((now) => {
+    last = now;
+    step(now);
+  });
+};
+
+// Duckie pointers: the scooter gang in the first fold.
+//  - 2nd scroll: they ride in from the left and park under the cards.
+//  - next scroll once they've parked: they ride on and off to the right.
+//  - scrolling back up after they have left: they ride in again (same
+//    entrance), park, and leave again on the next scroll down.
+// A "scroll" is one gesture - a burst of wheel ticks, a swipe, or a scroll
+// key - so one long trackpad flick counts once. Distance fallbacks make sure
+// neither step can be missed.
+const initHeroDuckies = () => {
+  const fold = document.querySelector(".hero-fold");
+
+  if (!fold || !fold.querySelector("[data-hero-duckies]")) {
+    return;
+  }
+
+  const SCROLLS_TO_ARRIVE = 2;
+  const SCROLLS_TO_LEAVE = 1;
+  const GESTURE_GAP = 220;
+  const ARRIVE_DISTANCE = 180;
+  const LEAVE_DISTANCE = 260; // further past the arrival point
+  const PARK_TIME = 1600; // the roll-in, in ms - matches the CSS
+
+  let phase = "waiting"; // waiting -> in -> parked -> out
+  let gestures = 0;
+  let lastInput = 0;
+  let arrivedAt = 0;
+  let arrivedY = 0;
+  let parkTimer = 0;
+  let leftFromY = 0; // furthest point scrolled since they left
+
+  const setPhase = (next) => {
+    phase = next;
+    gestures = 0;
+    fold.classList.toggle("is-duckies-in", next === "in" || next === "parked");
+    fold.classList.toggle("is-duckies-out", next === "out");
+  };
+
+  const arrive = () => {
+    setPhase("in");
+    arrivedAt = performance.now();
+    arrivedY = window.scrollY;
+    window.clearTimeout(parkTimer);
+    parkTimer = window.setTimeout(() => {
+      if (phase === "in") {
+        setPhase("parked");
+      }
+    }, PARK_TIME);
+  };
+
+  const leave = () => {
+    setPhase("out");
+    leftFromY = window.scrollY;
+  };
+
+  const step = () => {
+    if (phase === "waiting" && gestures >= SCROLLS_TO_ARRIVE) {
+      arrive();
+    } else if (phase === "parked" && gestures >= SCROLLS_TO_LEAVE) {
+      leave();
+    }
+  };
+
+  // count only while the first fold is still on screen, and not while the
+  // scooter is mid-arrival
+  const counting = () =>
+    fold.getBoundingClientRect().bottom > 0 && (phase === "waiting" || phase === "parked");
+
+  const onWheel = (event) => {
+    if (event.deltaY <= 0 || !counting()) {
+      return;
+    }
+
+    const now = performance.now();
+
+    if (now - lastInput > GESTURE_GAP) {
+      gestures += 1;
+      step();
+    }
+
+    lastInput = now;
+  };
+
+  let touchY = 0;
+  const onTouch = (event) => {
+    touchY = event.touches[0]?.clientY ?? 0;
+    window.addEventListener(
+      "touchend",
+      (end) => {
+        const endY = end.changedTouches[0]?.clientY ?? touchY;
+        if (touchY - endY > 24 && counting()) {
+          gestures += 1;
+          step();
+        }
+      },
+      { once: true, passive: true }
+    );
+  };
+
+  const onKey = (event) => {
+    if (["ArrowDown", "PageDown", " ", "Spacebar", "End"].includes(event.key) && counting()) {
+      gestures += 1;
+      step();
+    }
+  };
+
+  const onScroll = () => {
+    const y = window.scrollY;
+
+    if (phase === "out") {
+      leftFromY = Math.max(leftFromY, y);
+
+      // Scrolling back up with the first fold on screen: they come back.
+      // Works for wheel, swipe, keys and the scrollbar alike.
+      if (y < leftFromY - 60 && fold.getBoundingClientRect().bottom > 120) {
+        arrive();
+      }
+      return;
+    }
+
+    if (phase === "waiting" && y >= ARRIVE_DISTANCE) {
+      arrive();
+    } else if (phase === "parked" && y >= arrivedY + LEAVE_DISTANCE) {
+      leave();
+    }
+  };
+
+  // Arriving already scrolled well down (reload mid-page, deep link): skip it
+  // (no animation: they stay hidden until the visitor scrolls back up)
+  if (window.scrollY >= ARRIVE_DISTANCE) {
+    phase = "out";
+    leftFromY = window.scrollY;
+  }
+
+  window.addEventListener("wheel", onWheel, { passive: true });
+  window.addEventListener("touchstart", onTouch, { passive: true });
+  window.addEventListener("keydown", onKey);
+  window.addEventListener("scroll", onScroll, { passive: true });
 };
 
 const initQuackFold = () => {
@@ -379,9 +673,13 @@ const initQuackFold = () => {
   fit();
   window.addEventListener("resize", fit, { passive: true });
 
+  // With reduced motion the pills simply sit in place.
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
+
+  const pillsRoot = stage.querySelector("[data-quack-pills]");
+  pillsRoot?.setAttribute("data-armed", "");
 
   const cssAnimations = () => stage.getAnimations({ subtree: true });
 
@@ -401,10 +699,8 @@ const initQuackFold = () => {
 
   let ducky = null;
   let duckyName = "Timeline 1";
-  let bottom = null;
-  let bottomName = "Timeline 1";
   let duckyTimer = 0;
-  let bottomTimer = 0;
+  let pillsTimer = 0;
   let holdInterval = 0;
   let watchdog = 0;
   let started = false;
@@ -431,22 +727,6 @@ const initQuackFold = () => {
     }
   };
 
-  const initBottom = () => {
-    const canvas = stage.querySelector("[data-quack-bottom]");
-
-    if (!canvas || bottom || !window.rive || !window.__BOTTOM_RIV) {
-      return;
-    }
-
-    bottom = createRive(
-      canvas,
-      { buffer: decodeRiveBuffer(window.__BOTTOM_RIV) },
-      (name) => {
-        bottomName = name || bottomName;
-      }
-    );
-  };
-
   const startSequence = () => {
     if (started) {
       return;
@@ -470,11 +750,8 @@ const initQuackFold = () => {
       duckyTimer = window.setTimeout(() => playSafely(ducky, duckyName), QUACK_DUCKY_DELAY);
     }
 
-    initBottom();
-
-    if (bottom) {
-      bottom.stop();
-      bottomTimer = window.setTimeout(() => playSafely(bottom, bottomName), QUACK_BOTTOM_DELAY);
+    if (pillsRoot) {
+      pillsTimer = window.setTimeout(() => dropQuackPills(pillsRoot), QUACK_PILLS_DELAY);
     }
   };
 
@@ -560,7 +837,7 @@ const initQuackFold = () => {
     window.clearInterval(holdInterval);
     window.clearTimeout(watchdog);
     window.clearTimeout(duckyTimer);
-    window.clearTimeout(bottomTimer);
+    window.clearTimeout(pillsTimer);
   });
 };
 
@@ -1010,6 +1287,7 @@ const initAnimations = () => {
   initMobileTopbarFooterHandoff();
   initSwitchGapStretch();
   initQuackFold();
+  initHeroDuckies();
   initParallax();
   initFooterElastic();
   initToysCarousel();
