@@ -3146,3 +3146,21 @@ main::before {
   /* Figma draws the pill border inside the box */
   .hero-pill { padding: 9.35px 21.8px 10.07px; }
 }
+
+/* ===== New desktop duck creative (Figma "Group 1597882284", Nov 19) =====
+   1324x481 - taller than the old one because of the "end-to-end encrypted"
+   flag. Sized so that after the two-scroll reveal the flag sits just under
+   the cards (not hidden behind them) and the scooter just above the bottom of
+   a 1440x900 screen: ~1164px wide, bottom-anchored, with the fold getting
+   ~93px more room at the bottom (invisible on load). Phones keep the pills. */
+@media (min-width: 821px) {
+  .hero-fold {
+    min-height: calc(100svh + 203px - 10svh);
+    padding-bottom: calc(203px - 10svh);
+  }
+
+  .hero-duckies {
+    width: min(1164px, 80.8vw, calc((100svh - 477px) * 2.753));
+    bottom: 10px;
+  }
+}
